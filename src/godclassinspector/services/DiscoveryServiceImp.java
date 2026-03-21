@@ -15,7 +15,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 import godclassinspector.model.SourceFileDTO;
 
-public class ProjectDiscoveryServiceImpl implements ProjectDiscoveryService {
+public class DiscoveryServiceImp implements DiscoveryService {
 
     @Override
     public IProject detectProject(ExecutionEvent event) throws Exception {
@@ -30,26 +30,6 @@ public class ProjectDiscoveryServiceImpl implements ProjectDiscoveryService {
             }
         }
         throw new Exception("Invalid Selection: Please select the project root directory.");
-    }
-
-    @Override
-    public String getProjectSourceFolderPath(IProject project) {
-        IJavaProject javaProject = JavaCore.create(project);
-        String fallback = null;
-        try {
-            for (IPackageFragmentRoot root : javaProject.getPackageFragmentRoots()) {
-                if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
-                    String absolutePath = root.getResource().getLocation().toOSString();
-                    if (root.getPath().toString().contains("src/main/java")) {
-                        return absolutePath;
-                    }
-                    if (fallback == null) fallback = absolutePath;
-                }
-            }
-        } catch (JavaModelException e) {
-            e.printStackTrace();
-        }
-        return fallback;
     }
 
     @Override
@@ -77,6 +57,25 @@ public class ProjectDiscoveryServiceImpl implements ProjectDiscoveryService {
             	foundFiles.add(new SourceFileDTO(file, packageParent));
             }
         }
+    }
+    
+    private String getProjectSourceFolderPath(IProject project) {
+        IJavaProject javaProject = JavaCore.create(project);
+        String fallback = null;
+        try {
+            for (IPackageFragmentRoot root : javaProject.getPackageFragmentRoots()) {
+                if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
+                    String absolutePath = root.getResource().getLocation().toOSString();
+                    if (root.getPath().toString().contains("src/main/java")) {
+                        return absolutePath;
+                    }
+                    if (fallback == null) fallback = absolutePath;
+                }
+            }
+        } catch (JavaModelException e) {
+            e.printStackTrace();
+        }
+        return fallback;
     }
 
     private String getJavaFileParentPackage(String sourcePath, String filePath, String fileName) {

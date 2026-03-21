@@ -3,22 +3,19 @@ package godclassinspector.model;
 import java.io.File;
 
 public class SourceFileDTO {
-    private File file;
 	private String fileName;
     private String absolutePath;
     private String parentPackageName;
     private long fileSize;
+    private int weightedMethodCount;
+    private int accessToForeignData;
+    private float tightClassCohesion;
 
     public SourceFileDTO(File file, String parentPackageName) {
-    	this.file = file;
         this.fileName = file.getName();
         this.absolutePath = file.getAbsolutePath();
 		this.parentPackageName = parentPackageName;
         this.fileSize = file.length();
-    }
-
-    public File getFile() {
-    	return this.file;
     }
     
     public String getFileName() {
@@ -37,7 +34,32 @@ public class SourceFileDTO {
     	return this.fileSize;
     }
     
+    public int getWeightedMethodCount() {
+    	return this.weightedMethodCount;
+    }
+    
+    public int getAccessToForeignData() {
+    	return this.accessToForeignData;
+    }
+    
+    public float getTightClassCohesion() {
+    	return this.tightClassCohesion;
+    }
+    
+    public void setWeightedMethodCount(int weightedMethodCound) {
+    	this.weightedMethodCount = weightedMethodCound;
+    }
+    
+    public void setAccessToForeignData(int accessToForeignData) {
+    	this.accessToForeignData = accessToForeignData;
+    }
+    
+    public void setTightClassCohesion(float tightClassCohesion) {
+    	this.tightClassCohesion = tightClassCohesion;
+    }
+    
     public String toString() {
-    	return ("Filename: " + this.fileName + " | AbsolutPath: " + this.absolutePath + " | ParentPackageName: " + this.parentPackageName + " | FileSize: " + this.fileSize);
+    	return ("Filename: " + this.fileName + " | AbsolutPath: " + this.absolutePath + " | ParentPackageName: " + this.parentPackageName + " | FileSize: " + this.fileSize + 
+    			" | Weighted Method Count: " + this.weightedMethodCount + " | Access to Foreign Data: " + this.accessToForeignData + " | Tight Class Cohesion: " + this.tightClassCohesion);
     }
 }
