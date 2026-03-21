@@ -9,19 +9,19 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.handlers.HandlerUtil;
 import godclassinspector.model.SourceFileDTO;
-import godclassinspector.services.ScanProjectService;
-import godclassinspector.services.ScanProjectServiceImpl;
+import godclassinspector.services.ProjectDiscoveryService;
+import godclassinspector.services.ProjectDiscoveryServiceImpl;
 import godclassinspector.ui.FilesFoundUI;
 
 public class GodClassInspectorHandler extends AbstractHandler {
 
-    private final ScanProjectService scanProjectService = new ScanProjectServiceImpl();
+    private final ProjectDiscoveryService projectDiscoveryService = new ProjectDiscoveryServiceImpl();
 
     @Override
     public Object execute(ExecutionEvent event) throws ExecutionException {
         try {
-            IProject project = scanProjectService.detectProject(event);
-            List<SourceFileDTO> files = scanProjectService.findAllJavaFiles(project);
+            IProject project = projectDiscoveryService.detectProject(event);
+            List<SourceFileDTO> files = projectDiscoveryService.findAllJavaFiles(project);
             
             String scanCompletedMessage = "Project: " + project.getName() + "\nFiles Found: " + files.size();
             MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Scan Complete", scanCompletedMessage);

@@ -15,7 +15,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 import godclassinspector.model.SourceFileDTO;
 
-public class ScanProjectServiceImpl implements ScanProjectService {
+public class ProjectDiscoveryServiceImpl implements ProjectDiscoveryService {
 
     @Override
     public IProject detectProject(ExecutionEvent event) throws Exception {
@@ -81,9 +81,8 @@ public class ScanProjectServiceImpl implements ScanProjectService {
 
     private String getJavaFileParentPackage(String sourcePath, String filePath, String fileName) {
         String fileRelativePath = filePath.replace(sourcePath, "");
-        System.out.println(fileRelativePath);
         fileRelativePath = fileRelativePath.replace(File.separator + fileName, "");
-        System.out.println(fileRelativePath);
+        
         if (fileRelativePath.startsWith(File.separator)) {
         	fileRelativePath = fileRelativePath.substring(1);
         }
