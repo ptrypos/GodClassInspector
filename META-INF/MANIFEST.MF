@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: GodClassInspector
+Bundle-SymbolicName: GodClassInspector;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-Activator: godclassinspector.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources;bundle-version="3.23.200",
+ org.eclipse.jdt.core;bundle-version="3.45.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-21
+Automatic-Module-Name: GodClassInspector
+Bundle-ActivationPolicy: lazy
