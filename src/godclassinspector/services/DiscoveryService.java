@@ -7,5 +7,5 @@ import godclassinspector.model.SourceFileDTO;
 
 public interface DiscoveryService {
     IProject detectProject(ExecutionEvent event) throws Exception;
-    List<SourceFileDTO> findAllJavaFiles(IProject project);
+    List<SourceFileDTO> findAllJavaFiles(IProject project) throws Exception;
 }

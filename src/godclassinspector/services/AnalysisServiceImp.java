@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -20,7 +21,7 @@ import godclassinspector.model.SourceFileDTO;
 public class AnalysisServiceImp implements AnalysisService {
 	
 	@Override
-	public void calculateMetrics(SourceFileDTO sourceFile) {
+	public void calculateMetrics(SourceFileDTO sourceFile) throws Exception {
 		try {
 			File fileToAnalyze = new File(sourceFile.getAbsolutePath());
 			
@@ -34,8 +35,10 @@ public class AnalysisServiceImp implements AnalysisService {
 			sourceFile.setAccessToForeignData(accessToForeignData);
 			sourceFile.setTightClassCohesion(tightClassCohesion);
 			
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (NullPointerException nullPointerFile) {
+			throw new Exception("Invalid File Selection. There is no java file selected to analyze.");
+		} catch (ParseProblemException javaParserProblem) {
+			throw new Exception("Error in code. Java file might have syntax errors.");
 		}
 	}
 	

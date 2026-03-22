@@ -2,88 +2,93 @@
 <?eclipse version="3.4"?>
 <plugin>
 
-   <extension point="org.eclipse.ui.commands">
-      <category id="godclassinspector.commands.category" name="God Class Analysis"/>
-      <command
-            categoryId="godclassinspector.commands.category"
-            name="Scan Project for God Classes"
-            id="godclassinspector.commands.scanCommand">
-      </command>
-   </extension>
+	<extension point="org.eclipse.ui.commands">
+		<category
+			id="godclassinspector.commands.category"
+			name="God Class Analysis" />
+		<command
+			categoryId="godclassinspector.commands.category"
+			name="Scan Project for God Classes"
+			id="godclassinspector.commands.scanCommand">
+		</command>
+		<command
+			categoryId="godclassinspector.commands.category"
+			name="Analyze Project for God Classes"
+			id="godclassinspector.commands.analyzeCommand">
+		</command>
+	</extension>
 
-   <extension point="org.eclipse.ui.handlers">
-      <handler
-            class="godclassinspector.handlers.DiscoverHandler"
-            commandId="godclassinspector.commands.scanCommand">
-      </handler>
-   </extension>
+	<extension point="org.eclipse.ui.handlers">
+		<handler
+			class="godclassinspector.handlers.DiscoverHandler"
+			commandId="godclassinspector.commands.scanCommand">
+			<enabledWhen>
+				<with variable="selection">
+					<count value="1" />
+					<iterate ifEmpty="false">
+						<or>
+							<instanceof
+								value="org.eclipse.core.resources.IProject" />
+							<instanceof
+								value="org.eclipse.jdt.core.IJavaProject" />
+						</or>
+					</iterate>
+				</with>
+			</enabledWhen>
+		</handler>
 
-   <extension point="org.eclipse.ui.menus">
-      
-      <menuContribution locationURI="menu:org.eclipse.ui.main.menu?after=additions">
-         <menu id="godclassinspector.menus.mainMenu" label="God Class Inspector">
-            <command commandId="godclassinspector.commands.scanCommand" label="Scan Project">
-               <enabledWhen>
-                  <with variable="activeMenuSelection">
-                     <iterate ifEmpty="false" count="1">
-                        <or>
-                           <instanceof value="org.eclipse.core.resources.IProject"/>
-                           <instanceof value="org.eclipse.jdt.core.IJavaProject"/>
-                        </or>
-                     </iterate>
-                  </with>
-               </enabledWhen>
-            </command>
-         </menu>
-      </menuContribution>
-      
-      <menuContribution locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
-         <toolbar id="godclassinspector.toolbars.main">
-            <command
-                  commandId="godclassinspector.commands.scanCommand"
-                  icon="icons/sample.png"
-                  tooltip="Scan project for God Classes">
-               <enabledWhen>
-                  <with variable="activeMenuSelection">
-                     <iterate ifEmpty="false" count="1">
-                        <or>
-                           <instanceof value="org.eclipse.core.resources.IProject"/>
-                           <instanceof value="org.eclipse.jdt.core.IJavaProject"/>
-                        </or>
-                     </iterate>
-                  </with>
-               </enabledWhen>
-            </command>
-         </toolbar>
-      </menuContribution>
+		<handler
+			class="godclassinspector.handlers.AnalyzeHandler"
+			commandId="godclassinspector.commands.analyzeCommand">
+		</handler>
+	</extension>
 
-      <menuContribution
-            allPopups="false"
-            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
-         <menu id="godclassinspector.menus.contextMenu" label="God Class Inspector">
-            <command commandId="godclassinspector.commands.scanCommand" label="Scan Project">
-               <visibleWhen checkEnabled="false">
-                  <with variable="activeMenuSelection">
-                     <iterate ifEmpty="false" count="1">
-                        <or>
-                           <instanceof value="org.eclipse.core.resources.IProject"/>
-                           <instanceof value="org.eclipse.jdt.core.IJavaProject"/>
-                        </or>
-                     </iterate>
-                  </with>
-               </visibleWhen>
-            </command>
-         </menu>
-      </menuContribution>
+	<extension point="org.eclipse.ui.menus">
 
-   </extension>
+		<menuContribution
+			locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+			<menu
+				id="godclassinspector.menus.mainMenu"
+				label="God Class Inspector">
+				<command
+					commandId="godclassinspector.commands.scanCommand"
+					label="Scan Project"
+					tooltip="Detect source files of the project">
+					<visibleWhen checkEnabled="false" />
+				</command>
 
-   <extension point="org.eclipse.ui.views">
-      <view
-            class="godclassinspector.ui.FilesFoundUI"
-            id="godclassinspector.ui.foundFiles"
-            name="God Class Inspector Found Files">
-      </view>
-   </extension>
+				<command
+					commandId="godclassinspector.commands.analyzeCommand"
+					label="Analyze Project"
+					tooltip="Detect god classes if exist">
+					<visibleWhen checkEnabled="false" />
+				</command>
+			</menu>
+		</menuContribution>
+
+		<menuContribution
+			allPopups="false"
+			locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+			<menu
+				id="godclassinspector.menus.contextMenu"
+				label="God Class Inspector">
+				<command
+					commandId="godclassinspector.commands.scanCommand"
+					label="Scan Project"
+					tooltip="Detect source files of the project">
+					<visibleWhen checkEnabled="true" />
+				</command>
+			</menu>
+		</menuContribution>
+
+	</extension>
+
+	<extension point="org.eclipse.ui.views">
+		<view
+			class="godclassinspector.ui.FilesFoundUI"
+			id="godclassinspector.ui.foundFiles"
+			name="God Class Inspector Found Files">
+		</view>
+	</extension>
 
 </plugin>

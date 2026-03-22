@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
+
 import godclassinspector.model.SourceFileDTO;
 
 public class DiscoveryServiceImp implements DiscoveryService {
@@ -29,11 +30,11 @@ public class DiscoveryServiceImp implements DiscoveryService {
                 return project;
             }
         }
-        throw new Exception("Invalid Selection: Please select the project root directory.");
+        throw new Exception("Invalid project selection. Please select the project root directory in \"Project Explorer\" window.");
     }
 
     @Override
-    public List<SourceFileDTO> findAllJavaFiles(IProject project) {
+    public List<SourceFileDTO> findAllJavaFiles(IProject project) throws Exception {
         List<SourceFileDTO> foundFiles = new ArrayList<>();
         String sourcePath = this.getProjectSourceFolderPath(project);
         if (sourcePath != null) {
@@ -59,7 +60,7 @@ public class DiscoveryServiceImp implements DiscoveryService {
         }
     }
     
-    private String getProjectSourceFolderPath(IProject project) {
+    private String getProjectSourceFolderPath(IProject project) throws Exception {
         IJavaProject javaProject = JavaCore.create(project);
         String fallback = null;
         try {
@@ -73,7 +74,7 @@ public class DiscoveryServiceImp implements DiscoveryService {
                 }
             }
         } catch (JavaModelException e) {
-            e.printStackTrace();
+            throw new Exception("Failed to access java project source folder");
         }
         return fallback;
     }
