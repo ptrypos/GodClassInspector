@@ -6,43 +6,64 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import godclassinspector.model.ClassDTO;
 import godclassinspector.model.ScanResultsDTO;
 import godclassinspector.model.SourceFileDTO;
 import godclassinspector.services.AnalysisService;
 import godclassinspector.services.AnalysisServiceImp;
+import godclassinspector.services.UmlDiagramService;
+import godclassinspector.services.UmlDiagramServiceImp;
+import godclassinspector.ui.FoundFilesUI;
+import godclassinspector.ui.UmlDiagramUI;
 
 public class AnalyzeHandler extends AbstractHandler {
 
 	private final AnalysisService analysisService = new AnalysisServiceImp();
-	
+	private final UmlDiagramService umlDiagramService = new UmlDiagramServiceImp();
+
 	private static boolean enabled = false;
-	
+
 	@Override
     public Object execute(ExecutionEvent event) throws ExecutionException {
-        List<SourceFileDTO> projectDiscoveredFiles = ScanResultsDTO.getFiles();
+        List<SourceFileDTO> projectDiscoveredFilesList = ScanResultsDTO.getFiles();
+        FoundFilesUI foundFilesUI = ScanResultsDTO.getView();
         
+        IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
+        
+        IWorkbenchPage page = window.getActivePage();
+
         try {
-			for (int i = 0; i < projectDiscoveredFiles.size(); i++) {
-				analysisService.calculateMetrics(projectDiscoveredFiles.get(i));
-				
-				System.out.println(projectDiscoveredFiles.get(i).toString());
-			}
+        	analysisService.checkGodClass(projectDiscoveredFilesList);
+        	List<ClassDTO> projectClassesList = umlDiagramService.extractClassesFeatures(projectDiscoveredFilesList);
         	
-			System.out.println();
+        	for (ClassDTO projectClass : projectClassesList) {
+        		System.out.println(projectClass.toString());
+        	}
+        	
+        	System.out.println();
+        	
+    		foundFilesUI.setInput(projectDiscoveredFilesList);
+    		
+    		UmlDiagramUI umlView = (UmlDiagramUI) page.showView("godclassinspector.ui.umlDiagram");
+    		if (umlView != null) {
+    		    umlView.generateUML(projectClassesList);
+    		}
 		} catch (Exception e) {
 			MessageDialog.openError(HandlerUtil.getActiveShell(event), "Analyze Error", e.getMessage());
 		}
-        
+
         return null;
     }
-	
+
 	@Override
 	public boolean isEnabled() {
 		return enabled;
 	}
-	
+
 	public static void setEnabled(boolean enabledStatus) {
 		enabled = enabledStatus;
 	}

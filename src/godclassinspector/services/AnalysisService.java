@@ -1,12 +1,9 @@
 package godclassinspector.services;
 
-import com.github.javaparser.ast.CompilationUnit;
+import java.util.List;
 
 import godclassinspector.model.SourceFileDTO;
 
 public interface AnalysisService {
-	void calculateMetrics(SourceFileDTO sourceFile) throws Exception;
-	int calculateWeightedMethodCount(CompilationUnit analyzeCompilationUnit);
-	int calculateAccessToForeignData(CompilationUnit analyzeCompilationUnit);
-	float calculateTightClassCohesion(CompilationUnit analyzeCompilationUnit);
+	void checkGodClass(List<SourceFileDTO> files) throws Exception;
 }

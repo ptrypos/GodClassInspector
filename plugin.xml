@@ -8,13 +8,18 @@
 			name="God Class Analysis" />
 		<command
 			categoryId="godclassinspector.commands.category"
-			name="Scan Project for God Classes"
+			name="Scan for Source Files of the Project"
 			id="godclassinspector.commands.scanCommand">
 		</command>
 		<command
 			categoryId="godclassinspector.commands.category"
-			name="Analyze Project for God Classes"
+			name="Detect God Classes if Exist"
 			id="godclassinspector.commands.analyzeCommand">
+		</command>
+		<command
+			categoryId="godclassinspector.commands.category"
+			name="Scan And Detect God Classes if Exist"
+			id="godclassinspector.commands.scanAndAnalyzeCommand">
 		</command>
 	</extension>
 
@@ -41,6 +46,24 @@
 			class="godclassinspector.handlers.AnalyzeHandler"
 			commandId="godclassinspector.commands.analyzeCommand">
 		</handler>
+		
+		<handler
+			class="godclassinspector.handlers.ScanAndAnalyzeHandler"
+			commandId="godclassinspector.commands.scanAndAnalyzeCommand">
+			<enabledWhen>
+				<with variable="selection">
+					<count value="1" />
+					<iterate ifEmpty="false">
+						<or>
+							<instanceof
+								value="org.eclipse.core.resources.IProject" />
+							<instanceof
+								value="org.eclipse.jdt.core.IJavaProject" />
+						</or>
+					</iterate>
+				</with>
+			</enabledWhen>
+		</handler>
 	</extension>
 
 	<extension point="org.eclipse.ui.menus">
@@ -53,14 +76,21 @@
 				<command
 					commandId="godclassinspector.commands.scanCommand"
 					label="Scan Project"
-					tooltip="Detect source files of the project">
+					tooltip="Scan for Source Files of the Project">
 					<visibleWhen checkEnabled="false" />
 				</command>
 
 				<command
 					commandId="godclassinspector.commands.analyzeCommand"
 					label="Analyze Project"
-					tooltip="Detect god classes if exist">
+					tooltip="Detect God Classes if Exist">
+					<visibleWhen checkEnabled="false" />
+				</command>
+				
+				<command
+					commandId="godclassinspector.commands.scanAndAnalyzeCommand"
+					label="Scan And Analyze Project"
+					tooltip="Scan and Detect God Classes of the Project if Exists">
 					<visibleWhen checkEnabled="false" />
 				</command>
 			</menu>
@@ -78,6 +108,13 @@
 					tooltip="Detect source files of the project">
 					<visibleWhen checkEnabled="true" />
 				</command>
+				
+				<command
+					commandId="godclassinspector.commands.scanAndAnalyzeCommand"
+					label="Scan And Analyze Project"
+					tooltip="Scan and Detect God Classes of the Project if Exists">
+					<visibleWhen checkEnabled="true" />
+				</command>
 			</menu>
 		</menuContribution>
 
@@ -85,10 +122,16 @@
 
 	<extension point="org.eclipse.ui.views">
 		<view
-			class="godclassinspector.ui.FilesFoundUI"
+			class="godclassinspector.ui.FoundFilesUI"
 			id="godclassinspector.ui.foundFiles"
 			name="God Class Inspector Found Files">
 		</view>
+		
+		<view
+	         class="godclassinspector.ui.UmlDiagramUI"
+	         id="godclassinspector.ui.umlDiagram"
+	         name="Project UML Diagram">
+	   </view>
 	</extension>
 
 </plugin>

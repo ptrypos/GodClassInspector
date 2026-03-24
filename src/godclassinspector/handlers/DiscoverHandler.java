@@ -1,6 +1,7 @@
 package godclassinspector.handlers;
 
 import java.util.List;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -13,7 +14,7 @@ import godclassinspector.model.ScanResultsDTO;
 import godclassinspector.model.SourceFileDTO;
 import godclassinspector.services.DiscoveryService;
 import godclassinspector.services.DiscoveryServiceImp;
-import godclassinspector.ui.FilesFoundUI;
+import godclassinspector.ui.FoundFilesUI;
 
 public class DiscoverHandler extends AbstractHandler {
 
@@ -24,19 +25,17 @@ public class DiscoverHandler extends AbstractHandler {
         try {
             IProject project = discoveryService.detectProject(event);
             List<SourceFileDTO> projectDiscoveredFiles = discoveryService.findAllJavaFiles(project);
-            
-            String scanCompletedMessage = "Project: " + project.getName() + "\nFiles Found: " + projectDiscoveredFiles.size();
-            MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Scan Complete", scanCompletedMessage);
-            
-            IWorkbenchPage page = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage();
-            FilesFoundUI view = (FilesFoundUI) page.showView("godclassinspector.ui.foundFiles");
-            
-            if (view != null) {
-            	view.setInput(projectDiscoveredFiles);
+
+            IWorkbenchPage filesFoundWindow = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage();
+            FoundFilesUI foundFilesUI = (FoundFilesUI) filesFoundWindow.showView("godclassinspector.ui.foundFiles");
+
+            if (foundFilesUI != null) {
+            	foundFilesUI.setInput(projectDiscoveredFiles);
             }
 
             ScanResultsDTO.setFiles(projectDiscoveredFiles);
-            
+            ScanResultsDTO.setView(foundFilesUI);
+
             AnalyzeHandler.setEnabled(true);
             org.eclipse.ui.PlatformUI.getWorkbench().getService(org.eclipse.ui.services.IEvaluationService.class).requestEvaluation("selection");
         } catch (Exception e) {

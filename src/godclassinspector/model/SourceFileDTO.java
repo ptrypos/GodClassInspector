@@ -3,13 +3,15 @@ package godclassinspector.model;
 import java.io.File;
 
 public class SourceFileDTO {
+
 	private String fileName;
     private String absolutePath;
     private String parentPackageName;
     private long fileSize;
     private int weightedMethodCount;
     private int accessToForeignData;
-    private float tightClassCohesion;
+    private double tightClassCohesion;
+    private boolean isGodClass;
 
     public SourceFileDTO(File file, String parentPackageName) {
         this.fileName = file.getName();
@@ -17,49 +19,78 @@ public class SourceFileDTO {
 		this.parentPackageName = parentPackageName;
         this.fileSize = file.length();
     }
-    
+
     public String getFileName() {
-    	return this.fileName;
-    }
-    
-    public String getAbsolutePath() {
-    	return this.absolutePath;
-    }
-    
-    public String getParentPackageName() {
-    	return this.parentPackageName;
-    }
-    
-    public long getFileSize() {
-    	return this.fileSize;
-    }
-    
-    public int getWeightedMethodCount() {
-    	return this.weightedMethodCount;
-    }
-    
-    public int getAccessToForeignData() {
-    	return this.accessToForeignData;
-    }
-    
-    public float getTightClassCohesion() {
-    	return this.tightClassCohesion;
-    }
-    
-    public void setWeightedMethodCount(int weightedMethodCound) {
-    	this.weightedMethodCount = weightedMethodCound;
-    }
-    
-    public void setAccessToForeignData(int accessToForeignData) {
-    	this.accessToForeignData = accessToForeignData;
-    }
-    
-    public void setTightClassCohesion(float tightClassCohesion) {
-    	this.tightClassCohesion = tightClassCohesion;
-    }
-    
-    public String toString() {
-    	return ("Filename: " + this.fileName + " | AbsolutPath: " + this.absolutePath + " | ParentPackageName: " + this.parentPackageName + " | FileSize: " + this.fileSize + 
-    			" | Weighted Method Count: " + this.weightedMethodCount + " | Access to Foreign Data: " + this.accessToForeignData + " | Tight Class Cohesion: " + this.tightClassCohesion);
-    }
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+
+	public String getAbsolutePath() {
+		return absolutePath;
+	}
+
+	public void setAbsolutePath(String absolutePath) {
+		this.absolutePath = absolutePath;
+	}
+
+	public String getParentPackageName() {
+		return parentPackageName;
+	}
+
+	public void setParentPackageName(String parentPackageName) {
+		this.parentPackageName = parentPackageName;
+	}
+
+	public long getFileSize() {
+		return fileSize;
+	}
+
+	public void setFileSize(long fileSize) {
+		this.fileSize = fileSize;
+	}
+
+	public int getWeightedMethodCount() {
+		return weightedMethodCount;
+	}
+
+	public void setWeightedMethodCount(int weightedMethodCount) {
+		this.weightedMethodCount = weightedMethodCount;
+	}
+
+	public int getAccessToForeignData() {
+		return accessToForeignData;
+	}
+
+	public void setAccessToForeignData(int accessToForeignData) {
+		this.accessToForeignData = accessToForeignData;
+	}
+
+	public double getTightClassCohesion() {
+		return tightClassCohesion;
+	}
+
+	public void setTightClassCohesion(double tightClassCohesion) {
+		this.tightClassCohesion = tightClassCohesion;
+	}
+
+	public boolean isGodClass() {
+		return isGodClass;
+	}
+
+	public void setGodClass(boolean isGodClass) {
+		this.isGodClass = isGodClass;
+	}
+
+	@Override
+	public String toString() {
+		return "SourceFileDTO [fileName=" + fileName + ", absolutePath=" + absolutePath + ", parentPackageName="
+				+ parentPackageName + ", fileSize=" + fileSize + ", weightedMethodCount=" + weightedMethodCount
+				+ ", accessToForeignData=" + accessToForeignData + ", tightClassCohesion=" + tightClassCohesion
+				+ ", isGodClass=" + isGodClass + "]";
+	}
+
+
 }
