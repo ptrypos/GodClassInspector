@@ -25,25 +25,29 @@ public class UmlDiagramServiceImp implements UmlDiagramService {
 
 	@Override
 	public List<ClassDTO> extractClassesFeatures(List<SourceFileDTO> projectFiles) throws FileNotFoundException {
-		List<ClassDTO> projectClassesList = new ArrayList<ClassDTO>();
+		List<ClassDTO> projectClassesList = new ArrayList<>();
 		
-		for (int i = 0; i < projectFiles.size(); i++) {
-			SourceFileDTO projectFileData = projectFiles.get(i);
-			ClassDTO projectClass = this.createClassDto(projectFileData);
+		for (SourceFileDTO fileData : projectFiles) {
+			ClassDTO projectClass = this.createClassDto(fileData);
 			
-			File projectFile = new File(projectFileData.getAbsolutePath());
+			File projectFile = new File(fileData.getAbsolutePath());
 			
 			CompilationUnit compilationUnit = StaticJavaParser.parse(projectFile);
 			
 			compilationUnit.findFirst(ClassOrInterfaceDeclaration.class).ifPresent(decl -> {
 				projectClass.setInterface(decl.isInterface());
 				projectClass.setAbstract(decl.isAbstract());
-	        });
+                
+                decl.getExtendedTypes().forEach(st -> projectClass.setSuperClassName(st.getNameAsString()));
+                decl.getFields().forEach(f -> {
+                	projectClass.getDependencies().add(f.getElementType().asString());
+                });
+            });
 			
 			List<String> extractedClassFields = this.extractClassFields(compilationUnit);
 			List<String> extractedClassMethods = this.extractClassMethod(compilationUnit);
 			
-			projectClass.setGodClass(projectFileData.isGodClass());
+			projectClass.setGodClass(fileData.isGodClass());
 			projectClass.setFields(extractedClassFields);
 			projectClass.setMethods(extractedClassMethods);
 			

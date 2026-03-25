@@ -31,6 +31,10 @@ public class AnalysisServiceImp implements AnalysisService {
 	}
 
 	private boolean isGodClass(SourceFileDTO file) {
+		MetricsThresholdDTO.setWmcThreshold(0);
+		MetricsThresholdDTO.setAtfdThreshold(0);
+		MetricsThresholdDTO.setTccThreshold(1);
+		
 		int wmcThreshold = MetricsThresholdDTO.getWmcThreshold();
 		int atfdThreshold = MetricsThresholdDTO.getAtfdThreshold();
 		double tccThreshold = MetricsThresholdDTO.getTccThreshold();

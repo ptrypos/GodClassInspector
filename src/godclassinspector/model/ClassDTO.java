@@ -1,5 +1,6 @@
 package godclassinspector.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ClassDTO {
@@ -9,6 +10,9 @@ public class ClassDTO {
 	private boolean isInterface;
 	private boolean isAbstract;
 	private boolean isGodClass;
+	private String superClassName;
+    private List<String> implementedInterfaces = new ArrayList<>();
+    private List<String> dependencies = new ArrayList<>();
 	private List<String> fields;
 	private List<String> methods;
 
@@ -57,6 +61,30 @@ public class ClassDTO {
 		this.isGodClass = isGodClass;
 	}
 
+	public String getSuperClassName() {
+		return superClassName;
+	}
+
+	public void setSuperClassName(String superClassName) {
+		this.superClassName = superClassName;
+	}
+
+	public List<String> getImplementedInterfaces() {
+		return implementedInterfaces;
+	}
+
+	public void setImplementedInterfaces(List<String> implementedInterfaces) {
+		this.implementedInterfaces = implementedInterfaces;
+	}
+
+	public List<String> getDependencies() {
+		return dependencies;
+	}
+
+	public void setDependencies(List<String> dependencies) {
+		this.dependencies = dependencies;
+	}
+
 	public List<String> getFields() {
 		return fields;
 	}
@@ -76,7 +104,8 @@ public class ClassDTO {
 	@Override
 	public String toString() {
 		return "ClassDTO [className=" + className + ", packageName=" + packageName + ", isInterface=" + isInterface
-				+ ", isAbstract=" + isAbstract + ", isGodClass=" + isGodClass + ", fields=" + fields + ", methods="
-				+ methods + "]";
-	}
+				+ ", isAbstract=" + isAbstract + ", isGodClass=" + isGodClass + ", superClassName=" + superClassName
+				+ ", implementedInterfaces=" + implementedInterfaces + ", dependencies=" + dependencies + ", fields="
+				+ fields + ", methods=" + methods + "]";
+	}	
 }

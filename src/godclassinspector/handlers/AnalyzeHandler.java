@@ -40,12 +40,6 @@ public class AnalyzeHandler extends AbstractHandler {
         	analysisService.checkGodClass(projectDiscoveredFilesList);
         	List<ClassDTO> projectClassesList = umlDiagramService.extractClassesFeatures(projectDiscoveredFilesList);
         	
-        	for (ClassDTO projectClass : projectClassesList) {
-        		System.out.println(projectClass.toString());
-        	}
-        	
-        	System.out.println();
-        	
     		foundFilesUI.setInput(projectDiscoveredFilesList);
     		
     		UmlDiagramUI umlView = (UmlDiagramUI) page.showView("godclassinspector.ui.umlDiagram");
