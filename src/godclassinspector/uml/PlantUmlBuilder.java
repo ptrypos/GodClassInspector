@@ -4,226 +4,231 @@ import godclassinspector.model.ClassDTO;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-/**
- * Builds a PlantUML class diagram source string from a list of ClassDTOs.
- *
- * Layout order:
- *   1. Interfaces  (top)
- *   2. Abstract classes
- *   3. Regular classes
- *   4. God classes  (bottom, visually separated by a note/divider)
- *
- * Arrows are always orthogonal (no curves).
- */
 public class PlantUmlBuilder {
 
-    // ── Configuration ─────────────────────────────────────────────────────────
+	private int dpi = 96;
+	private int nodesep = 60;
+	private int ranksep = 80;
+	private int margin = 30;
+	private int padding = 10;
+	private boolean leftToRight = false;
 
-    private int dpi         = 96;
-    private int nodesep     = 60;
-    private int ranksep     = 80;
-    private int margin      = 30;
-    private int padding     = 10;
-    private boolean leftToRight = false;
+	public PlantUmlBuilder dpi(int dpi) {
+		this.dpi = dpi;
+		return this;
+	}
 
-    // ── Fluent setters ────────────────────────────────────────────────────────
+	public PlantUmlBuilder nodesep(int n) {
+		this.nodesep = n;
+		return this;
+	}
 
-    public PlantUmlBuilder dpi(int dpi)               { this.dpi = dpi;           return this; }
-    public PlantUmlBuilder nodesep(int n)             { this.nodesep = n;         return this; }
-    public PlantUmlBuilder ranksep(int r)             { this.ranksep = r;         return this; }
-    public PlantUmlBuilder margin(int m)              { this.margin = m;          return this; }
-    public PlantUmlBuilder padding(int p)             { this.padding = p;         return this; }
-    public PlantUmlBuilder leftToRight(boolean b)     { this.leftToRight = b;     return this; }
+	public PlantUmlBuilder ranksep(int r) {
+		this.ranksep = r;
+		return this;
+	}
 
-    // ── Main entry point ──────────────────────────────────────────────────────
+	public PlantUmlBuilder margin(int m) {
+		this.margin = m;
+		return this;
+	}
 
-    public String build(List<ClassDTO> classList) {
-        if (classList == null || classList.isEmpty()) return "";
+	public PlantUmlBuilder padding(int p) {
+		this.padding = p;
+		return this;
+	}
 
-        // ── Split into ordered buckets ────────────────────────────────────────
-        // PlantUML renders classes roughly in declaration order within each
-        // rank, so declaring interfaces first pushes them to the top rank,
-        // and declaring god classes last pushes them to the bottom rank.
-        List<ClassDTO> interfaces   = filter(classList, true,  false, false);
-        List<ClassDTO> abstracts    = filter(classList, false, true,  false);
-        List<ClassDTO> regular      = filter(classList, false, false, false);
-        List<ClassDTO> godClasses   = classList.stream()
-                                               .filter(ClassDTO::isGodClass)
-                                               .collect(Collectors.toList());
+	public PlantUmlBuilder leftToRight(boolean b) {
+		this.leftToRight = b;
+		return this;
+	}
 
-        // Within each bucket sort alphabetically for stable, readable output
-        Comparator<ClassDTO> alpha = Comparator.comparing(c -> cleanName(c.getClassName()));
-        interfaces.sort(alpha);
-        abstracts.sort(alpha);
-        regular.sort(alpha);
-        godClasses.sort(alpha);
+	public String build(List<ClassDTO> classList) {
+		if (classList == null || classList.isEmpty()) return "";
 
-        StringBuilder sb = new StringBuilder();
-        appendHeader(sb);
-        appendSkinParams(sb);
+		List<ClassDTO> interfaces = filter(classList, true, false, false);
+		List<ClassDTO> abstracts = filter(classList, false, true, false);
+		List<ClassDTO> regular = filter(classList, false, false, false);
+		List<ClassDTO> godClasses = filterGodClasses(classList);
 
-        // ── 1. Interfaces ─────────────────────────────────────────────────────
-        if (!interfaces.isEmpty()) {
-            sb.append("' ── Interfaces ──────────────────────────────────\n");
-            for (ClassDTO dto : interfaces) appendClassBlock(sb, dto);
-        }
+		Comparator<ClassDTO> alpha = Comparator.comparing(c -> cleanName(c.getClassName()));
+		interfaces.sort(alpha);
+		abstracts.sort(alpha);
+		regular.sort(alpha);
+		godClasses.sort(alpha);
 
-        // ── 2. Abstract classes ───────────────────────────────────────────────
-        if (!abstracts.isEmpty()) {
-            sb.append("' ── Abstract Classes ────────────────────────────\n");
-            for (ClassDTO dto : abstracts) appendClassBlock(sb, dto);
-        }
+		StringBuilder sb = new StringBuilder();
+		appendHeader(sb);
+		appendSkinParams(sb);
+		appendSection(sb, "' ── Interfaces ──────────────────────────────────\n", interfaces);
+		appendSection(sb, "' ── Abstract Classes ────────────────────────────\n", abstracts);
+		appendSection(sb, "' ── Classes ─────────────────────────────────────\n", regular);
+		appendSection(sb, "' ── God Classes ─────────────────────────────────\n", godClasses);
 
-        // ── 3. Regular classes ────────────────────────────────────────────────
-        if (!regular.isEmpty()) {
-            sb.append("' ── Classes ─────────────────────────────────────\n");
-            for (ClassDTO dto : regular) appendClassBlock(sb, dto);
-        }
+		for (ClassDTO dto : classList) {
+			appendRelationships(sb, dto, classList);
+		}
 
-        // ── 4. God classes (separated at the bottom) ──────────────────────────
-        if (!godClasses.isEmpty()) {
-            sb.append("' ── God Classes ─────────────────────────────────\n");
-            // A PlantUML package block visually groups and separates god classes
-            sb.append("package \"God Classes\" #FFD6D6 {\n");
-            for (ClassDTO dto : godClasses) appendClassBlock(sb, dto);
-            sb.append("}\n\n");
-        }
+		sb.append("@enduml");
+		return sb.toString();
+	}
 
-        // ── Relationships (after all class definitions) ───────────────────────
-        for (ClassDTO dto : classList) {
-            appendRelationships(sb, dto, classList);
-        }
+	private void appendHeader(StringBuilder sb) {
+		sb.append("@startuml\n");
+		sb.append("!pragma layout elk\n");
+		if (leftToRight) sb.append("left to right direction\n");
+	}
 
-        sb.append("@enduml");
-        return sb.toString();
-    }
+	private void appendSkinParams(StringBuilder sb) {
+		sb.append("skinparam dpi ").append(dpi).append("\n");
+		sb.append("skinparam backgroundcolor white\n");
+		sb.append("skinparam shadowing false\n");
+		sb.append("skinparam linetype ortho\n");
+		sb.append("skinparam ArrowColor #444444\n");
+		sb.append("skinparam ArrowThickness 1\n");
+		sb.append("skinparam nodesep ").append(nodesep).append("\n");
+		sb.append("skinparam ranksep ").append(ranksep).append("\n");
+		sb.append("skinparam margin ").append(margin).append("\n");
+		sb.append("skinparam padding ").append(padding).append("\n");
+		appendClassSkinParams(sb);
+		appendInterfaceSkinParams(sb);
+		appendGodClassSkinParams(sb);
+		sb.append("skinparam classAttributeIconSize 0\n");
+		sb.append("set namespaceSeparator none\n\n");
+	}
 
-    // ── Private section builders ──────────────────────────────────────────────
+	private void appendClassSkinParams(StringBuilder sb) {
+		sb.append("skinparam class {\n");
+		sb.append("  BackgroundColor White\n");
+		sb.append("  ArrowColor #444444\n");
+		sb.append("  BorderColor #666666\n");
+		sb.append("}\n");
+	}
 
-    private void appendHeader(StringBuilder sb) {
-        sb.append("@startuml\n");
-        // "elk" replaced "smetana" as the recommended built-in Java layout engine
-        // in PlantUML 1.2022+. It correctly honours "linetype ortho" (right-angle
-        // arrows) which smetana partially ignores.
-        sb.append("!pragma layout elk\n");
-        if (leftToRight) sb.append("left to right direction\n");
-    }
+	private void appendInterfaceSkinParams(StringBuilder sb) {
+		sb.append("skinparam interface {\n");
+		sb.append("  BackgroundColor #E1F5FE\n");
+		sb.append("  BorderColor #01579B\n");
+		sb.append("}\n");
+	}
 
-    private void appendSkinParams(StringBuilder sb) {
-        sb.append("skinparam dpi ").append(dpi).append("\n");
-        sb.append("skinparam backgroundcolor white\n");
-        sb.append("skinparam shadowing false\n");
+	private void appendGodClassSkinParams(StringBuilder sb) {
+		sb.append("skinparam class<<GodClass>> {\n");
+		sb.append("  BackgroundColor #FFAAAA\n");
+		sb.append("  BorderColor #CC0000\n");
+		sb.append("  FontColor #CC0000\n");
+		sb.append("}\n");
+	}
 
-        // ── Orthogonal (angled) arrows — no curves ────────────────────────────
-        // Both directives are needed: skinparam targets PlantUML's renderer,
-        // while the <style> block in appendHeader targets the smetana engine
-        // directly. Together they ensure no curved connectors appear.
-        sb.append("skinparam linetype ortho\n");
-        sb.append("skinparam ArrowColor #444444\n");
-        sb.append("skinparam ArrowThickness 1\n");
+	private void appendSection(StringBuilder sb, String comment, List<ClassDTO> classes) {
+		if (classes.isEmpty()) return;
+		sb.append(comment);
+		for (ClassDTO dto : classes) {
+			appendClassBlock(sb, dto);
+		}
+	}
 
-        sb.append("skinparam nodesep ").append(nodesep).append("\n");
-        sb.append("skinparam ranksep ").append(ranksep).append("\n");
-        sb.append("skinparam margin ").append(margin).append("\n");
-        sb.append("skinparam padding ").append(padding).append("\n");
+	private void appendClassBlock(StringBuilder sb, ClassDTO dto) {
+		String name = cleanName(dto.getClassName());
+		String type = resolveType(dto);
+		String stereo = dto.isGodClass() ? " <<GodClass>>" : "";
+		sb.append(type);
+		sb.append(quoted(name));
+		sb.append(stereo);
+		sb.append(" {\n");
+		appendMembers(sb, dto.getFields());
+		sb.append("  --\n");
+		appendMembers(sb, dto.getMethods());
+		sb.append("}\n\n");
+	}
 
-        sb.append("skinparam class {\n")
-          .append("  BackgroundColor White\n")
-          .append("  ArrowColor #444444\n")
-          .append("  BorderColor #666666\n")
-          .append("}\n");
+	private void appendMembers(StringBuilder sb, List<String> members) {
+		if (members == null) return;
+		for (String member : members) {
+			sb.append("  ");
+			sb.append(member);
+			sb.append("\n");
+		}
+	}
 
-        sb.append("skinparam interface {\n")
-          .append("  BackgroundColor #E1F5FE\n")
-          .append("  BorderColor #01579B\n")
-          .append("}\n");
+	private void appendRelationships(StringBuilder sb, ClassDTO dto, List<ClassDTO> all) {
+		String current = cleanName(dto.getClassName());
+		appendInheritance(sb, dto, current);
+		appendInterfaceRealisations(sb, dto, current);
+		appendDependencies(sb, dto, current, all);
+	}
 
-        // God class stereotype styling
-        sb.append("skinparam class<<GodClass>> {\n")
-          .append("  BackgroundColor #FFAAAA\n")
-          .append("  BorderColor #CC0000\n")
-          .append("  FontColor #CC0000\n")
-          .append("}\n");
+	private void appendInheritance(StringBuilder sb, ClassDTO dto, String current) {
+		if (dto.getSuperClassName() == null) return;
+		String parent = cleanName(dto.getSuperClassName());
+		sb.append(quoted(parent));
+		sb.append(" <|-- ");
+		sb.append(quoted(current));
+		sb.append("\n");
+	}
 
-        sb.append("skinparam classAttributeIconSize 0\n");
-        sb.append("set namespaceSeparator none\n\n");
-    }
+	private void appendInterfaceRealisations(StringBuilder sb, ClassDTO dto, String current) {
+		for (String iface : dto.getImplementedInterfaces()) {
+			String cleanIface = cleanName(iface);
+			sb.append(quoted(cleanIface));
+			sb.append(" <|.. ");
+			sb.append(quoted(current));
+			sb.append("\n");
+		}
+	}
 
-    private void appendClassBlock(StringBuilder sb, ClassDTO dto) {
-        String name  = cleanName(dto.getClassName());
-        String type  = resolveType(dto);
-        // God classes get the <<GodClass>> stereotype for skinparam targeting
-        // (the package block already groups them visually)
-        String stereo = dto.isGodClass() ? " <<GodClass>>" : "";
+	private void appendDependencies(StringBuilder sb, ClassDTO dto, String current, List<ClassDTO> all) {
+		if (dto.getDependencies() == null) return;
+		for (String dep : dto.getDependencies()) {
+			String cleanDep = cleanName(dep);
+			boolean isInDiagram = isInList(cleanDep, all);
+			boolean isNotSelf = !cleanDep.equals(current);
+			if (isInDiagram && isNotSelf) {
+				sb.append(quoted(current));
+				sb.append(" ..> ");
+				sb.append(quoted(cleanDep));
+				sb.append("\n");
+				}
+		}
+	}
 
-        sb.append(type).append(quoted(name)).append(stereo).append(" {\n");
-        appendMembers(sb, dto.getFields());
-        sb.append("  --\n");
-        appendMembers(sb, dto.getMethods());
-        sb.append("}\n\n");
-    }
+	private static List<ClassDTO> filter(List<ClassDTO> list, boolean isInterface, boolean isAbstract, boolean isGod) {
+		Stream<ClassDTO> stream = list.stream();
+		Predicate<ClassDTO> matchesInterface = c -> c.isInterface() == isInterface;
+		Predicate<ClassDTO> matchesAbstract = c -> c.isAbstract() == isAbstract;
+		Predicate<ClassDTO> matchesGod = c -> c.isGodClass() == isGod;
+		Predicate<ClassDTO> combined = matchesInterface.and(matchesAbstract).and(matchesGod);
+		return stream.filter(combined).collect(Collectors.toList());
+	}
 
-    private void appendMembers(StringBuilder sb, List<String> members) {
-        if (members == null) return;
-        for (String member : members) sb.append("  ").append(member).append("\n");
-    }
+	private static List<ClassDTO> filterGodClasses(List<ClassDTO> list) {
+		Stream<ClassDTO> stream = list.stream();
+		Predicate<ClassDTO> isGod = ClassDTO::isGodClass;
+		return stream.filter(isGod).collect(Collectors.toList());
+	}
 
-    private void appendRelationships(StringBuilder sb, ClassDTO dto, List<ClassDTO> all) {
-        String current = cleanName(dto.getClassName());
+	private static boolean isInList(String name, List<ClassDTO> list) {
+		Stream<ClassDTO> stream = list.stream();
+		Predicate<ClassDTO> nameMatches = c -> cleanName(c.getClassName()).equals(name);
+		return stream.anyMatch(nameMatches);
+	}
 
-        if (dto.getSuperClassName() != null) {
-            String parent = cleanName(dto.getSuperClassName());
-            sb.append(quoted(parent)).append(" <|-- ").append(quoted(current)).append("\n");
-        }
+	private static String cleanName(String name) {
+		if (name == null) return "";
+		return name.replace(".java", "");
+	}
 
-        for (String iface : dto.getImplementedInterfaces()) {
-            sb.append(quoted(cleanName(iface))).append(" <|.. ").append(quoted(current)).append("\n");
-        }
+	private static String quoted(String name) {
+		return "\"" + name + "\"";
+	}
 
-        if (dto.getDependencies() != null) {
-            for (String dep : dto.getDependencies()) {
-                String cleanDep = cleanName(dep);
-                if (isInList(cleanDep, all) && !cleanDep.equals(current)) {
-                    sb.append(quoted(current)).append(" ..> ").append(quoted(cleanDep)).append("\n");
-                }
-            }
-        }
-    }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
-    /**
-     * Returns classes matching the given type flags, excluding god classes
-     * (god classes are always handled in their own bucket).
-     */
-    private static List<ClassDTO> filter(List<ClassDTO> list,
-                                         boolean isInterface,
-                                         boolean isAbstract,
-                                         boolean isGod) {
-        return list.stream()
-                   .filter(c -> c.isInterface() == isInterface
-                             && c.isAbstract()  == isAbstract
-                             && c.isGodClass()  == isGod)
-                   .collect(Collectors.toList());
-    }
-
-    private static String cleanName(String name) {
-        return name == null ? "" : name.replace(".java", "");
-    }
-
-    private static String quoted(String name) {
-        return "\"" + name + "\"";
-    }
-
-    private static String resolveType(ClassDTO dto) {
-        if (dto.isInterface()) return "interface ";
-        if (dto.isAbstract())  return "abstract class ";
-        return "class ";
-    }
-
-    private static boolean isInList(String name, List<ClassDTO> list) {
-        return list.stream().anyMatch(c -> cleanName(c.getClassName()).equals(name));
-    }
+	private static String resolveType(ClassDTO dto) {
+		if (dto.isInterface()) return "interface ";
+		if (dto.isAbstract()) return "abstract class ";
+		return "class ";
+	}
 }

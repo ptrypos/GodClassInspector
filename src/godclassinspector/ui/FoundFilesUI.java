@@ -127,7 +127,13 @@ public class FoundFilesUI extends ViewPart {
 			try {
 				IDE.openEditorOnFileStore(page, fileStore);
 			} catch (PartInitException e) {
-				e.printStackTrace();
+				org.eclipse.jface.dialogs.MessageDialog.openError(
+					getSite().getShell(),
+					"Cannot Open File",
+					"The file could not be opened in the editor.\n" +
+					"It may have been moved, deleted, or is not accessible.\n\n" +
+					"File: " + absolutPath
+				);
 			}
 		}
 	}

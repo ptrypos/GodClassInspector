@@ -21,8 +21,6 @@ public class UmlDiagramServiceImp implements UmlDiagramService {
 	private final String PRIVATE_SYMBOL = "-";
 	private final String PROTECTED_SYMBOL = "#";
 
-	public UmlDiagramServiceImp() {}
-
 	@Override
 	public List<ClassDTO> extractClassesFeatures(List<SourceFileDTO> projectFiles) throws FileNotFoundException {
 		List<ClassDTO> projectClassesList = new ArrayList<>();
@@ -37,12 +35,12 @@ public class UmlDiagramServiceImp implements UmlDiagramService {
 			compilationUnit.findFirst(ClassOrInterfaceDeclaration.class).ifPresent(decl -> {
 				projectClass.setInterface(decl.isInterface());
 				projectClass.setAbstract(decl.isAbstract());
-                
-                decl.getExtendedTypes().forEach(st -> projectClass.setSuperClassName(st.getNameAsString()));
-                decl.getFields().forEach(f -> {
-                	projectClass.getDependencies().add(f.getElementType().asString());
-                });
-            });
+				
+				decl.getExtendedTypes().forEach(st -> projectClass.setSuperClassName(st.getNameAsString()));
+				decl.getFields().forEach(f -> {
+					projectClass.getDependencies().add(f.getElementType().asString());
+				});
+			});
 			
 			List<String> extractedClassFields = this.extractClassFields(compilationUnit);
 			List<String> extractedClassMethods = this.extractClassMethod(compilationUnit);

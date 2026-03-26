@@ -8,7 +8,6 @@ import godclassinspector.ui.FoundFilesUI;
 
 public class ScanResultsDTO {
 	private static List<SourceFileDTO> foundFiles;
-	private static IWorkbenchPage foundFilesPage;
 	private static FoundFilesUI foundFilesUiObject;
 
 	public static void setFiles(List<SourceFileDTO> files) {
@@ -21,14 +20,6 @@ public class ScanResultsDTO {
 
 	public static void clearFiles() {
 		foundFiles.clear();
-	}
-
-	public static IWorkbenchPage getPage() {
-		return foundFilesPage;
-	}
-
-	public static void setPage(IWorkbenchPage page) {
-		foundFilesPage = page;
 	}
 
 	public static FoundFilesUI getView() {

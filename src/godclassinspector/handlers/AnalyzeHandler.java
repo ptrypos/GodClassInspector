@@ -28,30 +28,30 @@ public class AnalyzeHandler extends AbstractHandler {
 	private static boolean enabled = false;
 
 	@Override
-    public Object execute(ExecutionEvent event) throws ExecutionException {
-        List<SourceFileDTO> projectDiscoveredFilesList = ScanResultsDTO.getFiles();
-        FoundFilesUI foundFilesUI = ScanResultsDTO.getView();
-        
-        IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
-        
-        IWorkbenchPage page = window.getActivePage();
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		List<SourceFileDTO> projectDiscoveredFilesList = ScanResultsDTO.getFiles();
+		FoundFilesUI foundFilesUI = ScanResultsDTO.getView();
+		
+		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
+		
+		IWorkbenchPage page = window.getActivePage();
 
-        try {
-        	analysisService.checkGodClass(projectDiscoveredFilesList);
-        	List<ClassDTO> projectClassesList = umlDiagramService.extractClassesFeatures(projectDiscoveredFilesList);
-        	
-    		foundFilesUI.setInput(projectDiscoveredFilesList);
-    		
-    		UmlDiagramUI umlView = (UmlDiagramUI) page.showView("godclassinspector.ui.umlDiagram");
-    		if (umlView != null) {
-    		    umlView.generateUML(projectClassesList);
-    		}
+		try {
+			analysisService.checkGodClass(projectDiscoveredFilesList);
+			List<ClassDTO> projectClassesList = umlDiagramService.extractClassesFeatures(projectDiscoveredFilesList);
+			
+			foundFilesUI.setInput(projectDiscoveredFilesList);
+			
+			UmlDiagramUI umlView = (UmlDiagramUI) page.showView("godclassinspector.ui.umlDiagram");
+			if (umlView != null) {
+			    umlView.generateUML(projectClassesList);
+			}
 		} catch (Exception e) {
 			MessageDialog.openError(HandlerUtil.getActiveShell(event), "Analyze Error", e.getMessage());
 		}
 
-        return null;
-    }
+		return null;
+	}
 
 	@Override
 	public boolean isEnabled() {

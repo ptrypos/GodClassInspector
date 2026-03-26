@@ -31,7 +31,7 @@ public class DiscoveryServiceImp implements DiscoveryService {
                 return project;
             }
         }
-        throw new Exception("Invalid project selection. Please select the project root directory in \"Project Explorer\" window.");
+        throw new Exception("No project selected. Please right-click your project root in the Project Explorer and run the command from there.");
     }
 
     @Override
@@ -77,7 +77,7 @@ public class DiscoveryServiceImp implements DiscoveryService {
                 }
             }
         } catch (JavaModelException e) {
-            throw new Exception("Failed to access java project source folder");
+            throw new Exception("Could not locate the source folder of the selected project. Make sure it is a valid Java project with a source folder configured.");
         }
         return fallback;
     }

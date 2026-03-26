@@ -69,9 +69,9 @@ public class AnalysisServiceImp implements AnalysisService {
 			sourceFile.setTightClassCohesion(tightClassCohesion);
 
 		} catch (NullPointerException nullPointerFile) {
-			throw new Exception("Invalid File Selection. There is no java file selected to analyze.");
+			throw new Exception("No file was found to analyze. Please make sure you have scanned the project first.");
 		} catch (ParseProblemException javaParserProblem) {
-			throw new Exception("Error in code. Java file might have syntax errors.");
+			throw new Exception("A Java file could not be parsed. It may contain syntax errors. Please fix any compilation errors in your project and try again.");
 		}
 	}
 

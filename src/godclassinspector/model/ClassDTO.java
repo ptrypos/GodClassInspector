@@ -11,8 +11,8 @@ public class ClassDTO {
 	private boolean isAbstract;
 	private boolean isGodClass;
 	private String superClassName;
-    private List<String> implementedInterfaces = new ArrayList<>();
-    private List<String> dependencies = new ArrayList<>();
+	private List<String> implementedInterfaces = new ArrayList<>();
+	private List<String> dependencies = new ArrayList<>();
 	private List<String> fields;
 	private List<String> methods;
 

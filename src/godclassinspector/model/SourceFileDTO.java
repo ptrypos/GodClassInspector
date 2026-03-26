@@ -5,22 +5,22 @@ import java.io.File;
 public class SourceFileDTO {
 
 	private String fileName;
-    private String absolutePath;
-    private String parentPackageName;
-    private long fileSize;
-    private int weightedMethodCount;
-    private int accessToForeignData;
-    private double tightClassCohesion;
-    private boolean isGodClass;
+	private String absolutePath;
+	private String parentPackageName;
+	private long fileSize;
+	private int weightedMethodCount;
+	private int accessToForeignData;
+	private double tightClassCohesion;
+	private boolean isGodClass;
 
-    public SourceFileDTO(File file, String parentPackageName) {
-        this.fileName = file.getName();
-        this.absolutePath = file.getAbsolutePath();
+	public SourceFileDTO(File file, String parentPackageName) {
+		this.fileName = file.getName();
+		this.absolutePath = file.getAbsolutePath();
 		this.parentPackageName = parentPackageName;
-        this.fileSize = file.length();
-    }
+		this.fileSize = file.length();
+	}
 
-    public String getFileName() {
+	public String getFileName() {
 		return fileName;
 	}
 
@@ -91,6 +91,4 @@ public class SourceFileDTO {
 				+ ", accessToForeignData=" + accessToForeignData + ", tightClassCohesion=" + tightClassCohesion
 				+ ", isGodClass=" + isGodClass + "]";
 	}
-
-
 }

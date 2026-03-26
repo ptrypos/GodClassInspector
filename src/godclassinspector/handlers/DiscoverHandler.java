@@ -18,29 +18,29 @@ import godclassinspector.ui.FoundFilesUI;
 
 public class DiscoverHandler extends AbstractHandler {
 
-    private final DiscoveryService discoveryService = new DiscoveryServiceImp();
+	private final DiscoveryService discoveryService = new DiscoveryServiceImp();
 
-    @Override
-    public Object execute(ExecutionEvent event) throws ExecutionException {
-        try {
-            IProject project = discoveryService.detectProject(event);
-            List<SourceFileDTO> projectDiscoveredFiles = discoveryService.findAllJavaFiles(project);
+	@Override
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		try {
+			IProject project = discoveryService.detectProject(event);
+			List<SourceFileDTO> projectDiscoveredFiles = discoveryService.findAllJavaFiles(project);
 
-            IWorkbenchPage filesFoundWindow = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage();
-            FoundFilesUI foundFilesUI = (FoundFilesUI) filesFoundWindow.showView("godclassinspector.ui.foundFiles");
+			IWorkbenchPage filesFoundWindow = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage();
+			FoundFilesUI foundFilesUI = (FoundFilesUI) filesFoundWindow.showView("godclassinspector.ui.foundFiles");
 
-            if (foundFilesUI != null) {
-            	foundFilesUI.setInput(projectDiscoveredFiles);
-            }
+			if (foundFilesUI != null) {
+				foundFilesUI.setInput(projectDiscoveredFiles);
+			}
 
-            ScanResultsDTO.setFiles(projectDiscoveredFiles);
-            ScanResultsDTO.setView(foundFilesUI);
+			ScanResultsDTO.setFiles(projectDiscoveredFiles);
+			ScanResultsDTO.setView(foundFilesUI);
 
-            AnalyzeHandler.setEnabled(true);
-            org.eclipse.ui.PlatformUI.getWorkbench().getService(org.eclipse.ui.services.IEvaluationService.class).requestEvaluation("selection");
-        } catch (Exception e) {
-            MessageDialog.openError(HandlerUtil.getActiveShell(event), "Scan Error", e.getMessage());
-        }
-        return null;
-    }
+			AnalyzeHandler.setEnabled(true);
+			org.eclipse.ui.PlatformUI.getWorkbench().getService(org.eclipse.ui.services.IEvaluationService.class).requestEvaluation("selection");
+		} catch (Exception e) {
+			MessageDialog.openError(HandlerUtil.getActiveShell(event), "Scan Error", e.getMessage());
+		}
+		return null;
+	}
 }
