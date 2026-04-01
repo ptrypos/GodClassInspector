@@ -9,8 +9,8 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 
+import godclassinspector.builders.PlantUmlBuilder;
 import godclassinspector.model.ClassDTO;
-import godclassinspector.uml.PlantUmlBuilder;
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SourceStringReader;
@@ -28,7 +28,9 @@ public class UmlDiagramUI extends ViewPart {
 
 	public void generateUML(List<ClassDTO> classList) {
 		String source = umlBuilder.build(classList);
-		if (source == null || source.isEmpty()) return;
+		if (source == null || source.isEmpty()) {
+			return;
+		}
 
 		new Thread(() -> {
 			try {
@@ -36,12 +38,16 @@ public class UmlDiagramUI extends ViewPart {
 				String html = wrapSvgInHtml(svg);
 
 				browser.getDisplay().asyncExec(() -> {
-					if (!browser.isDisposed()) browser.setText(html);
+					if (!browser.isDisposed()) {
+						browser.setText(html);
+					}
 				});
 
 			} catch (Exception ex) {
 				browser.getDisplay().asyncExec(() -> {
-					if (!browser.isDisposed()) browser.setText(errorPage(ex.getMessage()));
+					if (!browser.isDisposed()) {
+						browser.setText(errorPage(ex.getMessage()));
+					}
 				});
 			}
 		}, "plantuml-render").start();
@@ -130,7 +136,9 @@ public class UmlDiagramUI extends ViewPart {
 
 	@Override
 	public void setFocus() {
-		if (browser != null && !browser.isDisposed()) browser.setFocus();
+		if (browser != null && !browser.isDisposed()) {
+			browser.setFocus();
+		}
 	}
 
 	@Override

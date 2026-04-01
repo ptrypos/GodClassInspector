@@ -30,11 +30,29 @@ public class AnalysisServiceImp implements AnalysisService {
 		}
 	}
 
+	@Override
+	public Map<MethodDeclaration, Set<String>> getMethodToFields(CompilationUnit analyzeCompilationUnit) {
+	    Map<MethodDeclaration, Set<String>> methodToFields = new HashMap<>();
+
+	    for (MethodDeclaration method : analyzeCompilationUnit.findAll(MethodDeclaration.class)) {
+	        Set<String> usedFields = new HashSet<>();
+	        List<NameExpr> fields = method.findAll(NameExpr.class);
+
+	        for (NameExpr field : fields) {
+	            usedFields.add(field.getNameAsString());
+	        }
+
+	        methodToFields.put(method, usedFields);
+	    }
+
+	    return methodToFields;
+	}
+
 	private boolean isGodClass(SourceFileDTO file) {
 		MetricsThresholdDTO.setWmcThreshold(0);
 		MetricsThresholdDTO.setAtfdThreshold(0);
 		MetricsThresholdDTO.setTccThreshold(1);
-		
+
 		int wmcThreshold = MetricsThresholdDTO.getWmcThreshold();
 		int atfdThreshold = MetricsThresholdDTO.getAtfdThreshold();
 		double tccThreshold = MetricsThresholdDTO.getTccThreshold();
@@ -141,22 +159,5 @@ public class AnalysisServiceImp implements AnalysisService {
 		}
 
 		return tightClassCohesion;
-	}
-
-	private Map<MethodDeclaration, Set<String>> getMethodToFields(CompilationUnit analyzeCompilationUnit) {
-	    Map<MethodDeclaration, Set<String>> methodToFields = new HashMap<>();
-
-	    for (MethodDeclaration method : analyzeCompilationUnit.findAll(MethodDeclaration.class)) {
-	        Set<String> usedFields = new HashSet<>();
-	        List<NameExpr> fields = method.findAll(NameExpr.class);
-
-	        for (NameExpr field : fields) {
-	            usedFields.add(field.getNameAsString());
-	        }
-
-	        methodToFields.put(method, usedFields);
-	    }
-
-	    return methodToFields;
 	}
 }

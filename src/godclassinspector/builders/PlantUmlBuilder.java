@@ -1,12 +1,12 @@
-package godclassinspector.uml;
-
-import godclassinspector.model.ClassDTO;
+package godclassinspector.builders;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import godclassinspector.model.ClassDTO;
 
 public class PlantUmlBuilder {
 
@@ -55,8 +55,9 @@ public class PlantUmlBuilder {
 	}
 
 	public String build(List<ClassDTO> classList) {
-		if (classList == null || classList.isEmpty())
+		if (classList == null || classList.isEmpty()) {
 			return "";
+		}
 
 		List<ClassDTO> interfaces = filter(classList, true, false, false);
 		List<ClassDTO> abstracts = filter(classList, false, true, false);
@@ -88,8 +89,9 @@ public class PlantUmlBuilder {
 	private void appendHeader(StringBuilder sb) {
 		sb.append("@startuml\n");
 		sb.append("!pragma layout elk\n");
-		if (leftToRight)
+		if (leftToRight) {
 			sb.append("left to right direction\n");
+		}
 	}
 
 	private void appendSkinParams(StringBuilder sb) {
@@ -134,8 +136,9 @@ public class PlantUmlBuilder {
 	}
 
 	private void appendSection(StringBuilder sb, String comment, List<ClassDTO> classes) {
-		if (classes.isEmpty())
+		if (classes.isEmpty()) {
 			return;
+		}
 		sb.append(comment);
 		for (ClassDTO dto : classes) {
 			appendClassBlock(sb, dto);
@@ -157,8 +160,9 @@ public class PlantUmlBuilder {
 	}
 
 	private void appendMembers(StringBuilder sb, List<String> members) {
-		if (members == null)
+		if (members == null) {
 			return;
+		}
 		for (String member : members) {
 			sb.append("  ");
 			sb.append(member);
@@ -174,8 +178,9 @@ public class PlantUmlBuilder {
 	}
 
 	private void appendInheritance(StringBuilder sb, ClassDTO dto, String current) {
-		if (dto.getSuperClassName() == null)
+		if (dto.getSuperClassName() == null) {
 			return;
+		}
 		String parent = cleanName(dto.getSuperClassName());
 		sb.append(quoted(parent));
 		sb.append(" <|-- ");
@@ -194,8 +199,9 @@ public class PlantUmlBuilder {
 	}
 
 	private void appendDependencies(StringBuilder sb, ClassDTO dto, String current, List<ClassDTO> all) {
-		if (dto.getDependencies() == null)
+		if (dto.getDependencies() == null) {
 			return;
+		}
 		for (String dep : dto.getDependencies()) {
 			String cleanDep = cleanName(dep);
 			boolean isInDiagram = isInList(cleanDep, all);
@@ -231,8 +237,9 @@ public class PlantUmlBuilder {
 	}
 
 	private static String cleanName(String name) {
-		if (name == null)
+		if (name == null) {
 			return "";
+		}
 		return name.replace(".java", "");
 	}
 
@@ -241,10 +248,12 @@ public class PlantUmlBuilder {
 	}
 
 	private static String resolveType(ClassDTO dto) {
-		if (dto.isInterface())
+		if (dto.isInterface()) {
 			return "interface ";
-		if (dto.isAbstract())
+		}
+		if (dto.isAbstract()) {
 			return "abstract class ";
+		}
 		return "class ";
 	}
 }

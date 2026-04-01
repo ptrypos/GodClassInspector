@@ -21,6 +21,11 @@
 			name="Scan And Detect God Classes if Exist"
 			id="godclassinspector.commands.scanAndAnalyzeCommand">
 		</command>
+		<command
+	        categoryId="godclassinspector.commands.category"
+	        id="godclassinspector.commands.settings"
+	        name="Change Settings">
+		</command>
 	</extension>
 
 	<extension point="org.eclipse.ui.handlers">
@@ -64,6 +69,11 @@
 				</with>
 			</enabledWhen>
 		</handler>
+		
+		<handler
+		    class="godclassinspector.handlers.SettingsHandler"
+		    commandId="godclassinspector.commands.settings">
+		</handler>
 	</extension>
 
 	<extension point="org.eclipse.ui.menus">
@@ -87,12 +97,27 @@
 					<visibleWhen checkEnabled="false" />
 				</command>
 				
-				<command
-					commandId="godclassinspector.commands.scanAndAnalyzeCommand"
-					label="Scan And Analyze Project"
-					tooltip="Scan and Detect God Classes of the Project if Exists">
-					<visibleWhen checkEnabled="false" />
-				</command>
+			    <command
+			          commandId="godclassinspector.commands.scanAndAnalyzeCommand"
+			          label="Scan And Analyze Project"
+			          tooltip="Scan and Detect God Classes of the Project if Exists">
+			       <visibleWhen
+			             checkEnabled="false">
+			       </visibleWhen>
+			    </command>
+			    
+			    <separator
+			          name="GodClassInspector.separator1"
+			          visible="true">
+			    </separator>
+			    
+			    <command
+			          commandId="godclassinspector.commands.settings"
+			          label="Change Settings"
+			          style="push"
+			          tooltip="Change Settings for the Detection">
+			    </command>
+				
 			</menu>
 		</menuContribution>
 

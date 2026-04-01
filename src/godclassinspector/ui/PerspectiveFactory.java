@@ -10,7 +10,7 @@ public class PerspectiveFactory implements IPerspectiveFactory {
 		String editorArea = layout.getEditorArea();
 
 		IFolderLayout bottom = layout.createFolder("bottom", IPageLayout.BOTTOM, 0.25f, editorArea);
-		
+
 		bottom.addView("godclassinspector.ui.foundFiles");
 		bottom.addView("godclassinspector.ui.umlDiagram");
 	}

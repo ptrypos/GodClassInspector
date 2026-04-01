@@ -24,46 +24,46 @@ public class UmlDiagramServiceImp implements UmlDiagramService {
 	@Override
 	public List<ClassDTO> extractClassesFeatures(List<SourceFileDTO> projectFiles) throws FileNotFoundException {
 		List<ClassDTO> projectClassesList = new ArrayList<>();
-		
+
 		for (SourceFileDTO fileData : projectFiles) {
 			ClassDTO projectClass = this.createClassDto(fileData);
-			
+
 			File projectFile = new File(fileData.getAbsolutePath());
-			
+
 			CompilationUnit compilationUnit = StaticJavaParser.parse(projectFile);
-			
+
 			compilationUnit.findFirst(ClassOrInterfaceDeclaration.class).ifPresent(decl -> {
 				projectClass.setInterface(decl.isInterface());
 				projectClass.setAbstract(decl.isAbstract());
-				
+
 				decl.getExtendedTypes().forEach(st -> projectClass.setSuperClassName(st.getNameAsString()));
 				decl.getFields().forEach(f -> {
 					projectClass.getDependencies().add(f.getElementType().asString());
 				});
 			});
-			
+
 			List<String> extractedClassFields = this.extractClassFields(compilationUnit);
 			List<String> extractedClassMethods = this.extractClassMethod(compilationUnit);
-			
+
 			projectClass.setGodClass(fileData.isGodClass());
 			projectClass.setFields(extractedClassFields);
 			projectClass.setMethods(extractedClassMethods);
-			
+
 			projectClassesList.add(projectClass);
 		}
-		
+
 		return projectClassesList;
 	}
 
 	private ClassDTO createClassDto(SourceFileDTO file) {
 		String className = file.getFileName();
 		String packageName = file.getParentPackageName();
-		
+
 		ClassDTO projectClass = new ClassDTO(className, packageName);
-		
+
 		return projectClass;
 	}
-	
+
 	private List<String> extractClassFields(CompilationUnit compilationUnit) {
 		List<String> extractedClassFields = new ArrayList<>();
 		List<FieldDeclaration> classFields = compilationUnit.findAll(FieldDeclaration.class);

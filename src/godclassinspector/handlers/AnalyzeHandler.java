@@ -15,6 +15,8 @@ import godclassinspector.model.ScanResultsDTO;
 import godclassinspector.model.SourceFileDTO;
 import godclassinspector.services.AnalysisService;
 import godclassinspector.services.AnalysisServiceImp;
+import godclassinspector.services.SuggestionsRefactoringService;
+import godclassinspector.services.SuggestionsRefactoringServiceImp;
 import godclassinspector.services.UmlDiagramService;
 import godclassinspector.services.UmlDiagramServiceImp;
 import godclassinspector.ui.FoundFilesUI;
@@ -24,6 +26,7 @@ public class AnalyzeHandler extends AbstractHandler {
 
 	private final AnalysisService analysisService = new AnalysisServiceImp();
 	private final UmlDiagramService umlDiagramService = new UmlDiagramServiceImp();
+	private final SuggestionsRefactoringService suggestionsRefactoring = new SuggestionsRefactoringServiceImp();
 
 	private static boolean enabled = false;
 
@@ -31,21 +34,23 @@ public class AnalyzeHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		List<SourceFileDTO> projectDiscoveredFilesList = ScanResultsDTO.getFiles();
 		FoundFilesUI foundFilesUI = ScanResultsDTO.getView();
-		
+
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
-		
+
 		IWorkbenchPage page = window.getActivePage();
 
 		try {
 			analysisService.checkGodClass(projectDiscoveredFilesList);
 			List<ClassDTO> projectClassesList = umlDiagramService.extractClassesFeatures(projectDiscoveredFilesList);
-			
+			//Map<String, String> suggestions = suggestionsRefactoring.suggestRefactoring(projectDiscoveredFilesList);
+
 			foundFilesUI.setInput(projectDiscoveredFilesList);
-			
+
 			UmlDiagramUI umlView = (UmlDiagramUI) page.showView("godclassinspector.ui.umlDiagram");
 			if (umlView != null) {
 			    umlView.generateUML(projectClassesList);
 			}
+
 		} catch (Exception e) {
 			MessageDialog.openError(HandlerUtil.getActiveShell(event), "Analyze Error", e.getMessage());
 		}

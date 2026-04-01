@@ -107,5 +107,5 @@ public class ClassDTO {
 				+ ", isAbstract=" + isAbstract + ", isGodClass=" + isGodClass + ", superClassName=" + superClassName
 				+ ", implementedInterfaces=" + implementedInterfaces + ", dependencies=" + dependencies + ", fields="
 				+ fields + ", methods=" + methods + "]";
-	}	
+	}
 }
