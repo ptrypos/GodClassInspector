@@ -124,13 +124,13 @@
 		<view
 			class="godclassinspector.ui.FoundFilesUI"
 			id="godclassinspector.ui.foundFiles"
-			name="God Class Inspector Found Files">
+			name="God Class Inspector">
 		</view>
 		
 		<view
 	         class="godclassinspector.ui.UmlDiagramUI"
 	         id="godclassinspector.ui.umlDiagram"
-	         name="Project UML Diagram">
+	         name="UML With God Classes">
 	   </view>
 	</extension>
 

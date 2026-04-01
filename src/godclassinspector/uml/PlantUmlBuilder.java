@@ -10,12 +10,19 @@ import java.util.stream.Stream;
 
 public class PlantUmlBuilder {
 
-	private int dpi = 96;
-	private int nodesep = 60;
-	private int ranksep = 80;
-	private int margin = 30;
-	private int padding = 10;
-	private boolean leftToRight = false;
+	private final int DEFAULT_DPI = 96;
+	private final int DEFAULT_NODESEP = 60;
+	private final int DEFAULT_RANKSEP = 80;
+	private final int DEFAUTL_MARGIN = 30;
+	private final int DEFAULT_PADDING= 10;
+	private final boolean DEFAULT_LEFTTORIGHT = false;
+
+	private int dpi = DEFAULT_DPI;
+	private int nodesep = DEFAULT_NODESEP;
+	private int ranksep = DEFAULT_RANKSEP;
+	private int margin = DEFAUTL_MARGIN;
+	private int padding = DEFAULT_PADDING;
+	private boolean leftToRight = DEFAULT_LEFTTORIGHT;
 
 	public PlantUmlBuilder dpi(int dpi) {
 		this.dpi = dpi;
@@ -48,7 +55,8 @@ public class PlantUmlBuilder {
 	}
 
 	public String build(List<ClassDTO> classList) {
-		if (classList == null || classList.isEmpty()) return "";
+		if (classList == null || classList.isEmpty())
+			return "";
 
 		List<ClassDTO> interfaces = filter(classList, true, false, false);
 		List<ClassDTO> abstracts = filter(classList, false, true, false);
@@ -80,7 +88,8 @@ public class PlantUmlBuilder {
 	private void appendHeader(StringBuilder sb) {
 		sb.append("@startuml\n");
 		sb.append("!pragma layout elk\n");
-		if (leftToRight) sb.append("left to right direction\n");
+		if (leftToRight)
+			sb.append("left to right direction\n");
 	}
 
 	private void appendSkinParams(StringBuilder sb) {
@@ -125,7 +134,8 @@ public class PlantUmlBuilder {
 	}
 
 	private void appendSection(StringBuilder sb, String comment, List<ClassDTO> classes) {
-		if (classes.isEmpty()) return;
+		if (classes.isEmpty())
+			return;
 		sb.append(comment);
 		for (ClassDTO dto : classes) {
 			appendClassBlock(sb, dto);
@@ -147,7 +157,8 @@ public class PlantUmlBuilder {
 	}
 
 	private void appendMembers(StringBuilder sb, List<String> members) {
-		if (members == null) return;
+		if (members == null)
+			return;
 		for (String member : members) {
 			sb.append("  ");
 			sb.append(member);
@@ -163,7 +174,8 @@ public class PlantUmlBuilder {
 	}
 
 	private void appendInheritance(StringBuilder sb, ClassDTO dto, String current) {
-		if (dto.getSuperClassName() == null) return;
+		if (dto.getSuperClassName() == null)
+			return;
 		String parent = cleanName(dto.getSuperClassName());
 		sb.append(quoted(parent));
 		sb.append(" <|-- ");
@@ -182,7 +194,8 @@ public class PlantUmlBuilder {
 	}
 
 	private void appendDependencies(StringBuilder sb, ClassDTO dto, String current, List<ClassDTO> all) {
-		if (dto.getDependencies() == null) return;
+		if (dto.getDependencies() == null)
+			return;
 		for (String dep : dto.getDependencies()) {
 			String cleanDep = cleanName(dep);
 			boolean isInDiagram = isInList(cleanDep, all);
@@ -192,7 +205,7 @@ public class PlantUmlBuilder {
 				sb.append(" ..> ");
 				sb.append(quoted(cleanDep));
 				sb.append("\n");
-				}
+			}
 		}
 	}
 
@@ -218,7 +231,8 @@ public class PlantUmlBuilder {
 	}
 
 	private static String cleanName(String name) {
-		if (name == null) return "";
+		if (name == null)
+			return "";
 		return name.replace(".java", "");
 	}
 
@@ -227,8 +241,10 @@ public class PlantUmlBuilder {
 	}
 
 	private static String resolveType(ClassDTO dto) {
-		if (dto.isInterface()) return "interface ";
-		if (dto.isAbstract()) return "abstract class ";
+		if (dto.isInterface())
+			return "interface ";
+		if (dto.isAbstract())
+			return "abstract class ";
 		return "class ";
 	}
 }

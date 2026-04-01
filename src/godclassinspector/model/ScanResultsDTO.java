@@ -2,8 +2,6 @@ package godclassinspector.model;
 
 import java.util.List;
 
-import org.eclipse.ui.IWorkbenchPage;
-
 import godclassinspector.ui.FoundFilesUI;
 
 public class ScanResultsDTO {

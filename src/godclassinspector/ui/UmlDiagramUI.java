@@ -18,12 +18,7 @@ import net.sourceforge.plantuml.SourceStringReader;
 public class UmlDiagramUI extends ViewPart {
 
 	private Browser browser;
-	private final PlantUmlBuilder umlBuilder = new PlantUmlBuilder()
-			.dpi(96)
-			.nodesep(60)
-			.ranksep(80)
-			.margin(30)
-			.padding(10);
+	private final PlantUmlBuilder umlBuilder = new PlantUmlBuilder();
 
 	@Override
 	public void createPartControl(Composite parent) {
@@ -63,7 +58,7 @@ public class UmlDiagramUI extends ViewPart {
 	private static String wrapSvgInHtml(String svg) {
 		return "<!DOCTYPE html><html><head><meta charset='utf-8'/><style>\n"
 			+ "  * { margin:0; padding:0; box-sizing:border-box; }\n"
-			+ "  html, body { width:100%; height:100%; overflow:hidden; background:#f5f5f5; }\n"
+			+ "  html, body { width:100%; height:100%; overflow:hidden; background:#363636; }\n"
 			+ "  #viewport  { width:100%; height:100%; overflow:hidden; cursor:grab; }\n"
 			+ "  #viewport.dragging { cursor:grabbing; }\n"
 			+ "  #diagram   { display:inline-block; transform-origin:0 0; user-select:none; }\n"
