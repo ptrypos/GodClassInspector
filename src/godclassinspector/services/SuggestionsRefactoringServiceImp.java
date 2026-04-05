@@ -1,6 +1,7 @@
 package godclassinspector.services;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -12,6 +13,8 @@ import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.FieldAccessExpr;
+import com.github.javaparser.ast.expr.MethodCallExpr;
 
 import godclassinspector.model.MetricsThresholdDTO;
 import godclassinspector.model.SourceFileDTO;
@@ -21,74 +24,88 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 	private final AnalysisService analysisService = new AnalysisServiceImp();
 
 	@Override
-	public Map<String, String> suggestRefactoring(List<SourceFileDTO> files) throws Exception {
-		Map<String, String> refactoringSuggestions = new HashMap<>();
+	public Map<String, Map<String, String>> suggestRefactoring(List<SourceFileDTO> files) throws Exception {
+		Map<String, Map<String, String>> refactoringSuggestions = new HashMap<>();
 
 		for (SourceFileDTO file : files) {
 			if (!file.isGodClass()) {
 				continue;
 			}
 
-			List<String> suggestions = new ArrayList<>();
+			Map<String, String> typeToSuggestions = new HashMap<>();
 
-			String hfdaSuggestion = suggestionsForHfda(file);
-			if (!hfdaSuggestion.isEmpty()) {
-				suggestions.add(hfdaSuggestion);
+			String moveMethodSuggestions = getMoveMethodSuggestions(file);
+			if (!moveMethodSuggestions.isEmpty()) {
+				typeToSuggestions.put("Move Method", moveMethodSuggestions);
 			}
 
-			String wmcSuggestion = suggestionsForWmc(file);
-			if (!wmcSuggestion.isEmpty()) {
-				suggestions.add(wmcSuggestion);
+			String extractClassSuggestions = getExtractClassSuggestions(file);
+			if (!extractClassSuggestions.isEmpty()) {
+				typeToSuggestions.put("Extract Class", extractClassSuggestions);
 			}
 
-			String tccSuggestion = suggestionsForTcc(file);
-			if (!tccSuggestion.isEmpty()) {
-				suggestions.add(tccSuggestion);
-			}
-
-			String consolidatedSuggestion = String.join(";", suggestions);
-			if (!consolidatedSuggestion.isEmpty()) {
-				String className = file.getFileName().replace(".java", "");
-				refactoringSuggestions.put(className, consolidatedSuggestion);
+			if (!typeToSuggestions.isEmpty()) {
+				refactoringSuggestions.put(file.getClassName(), typeToSuggestions);
 			}
 		}
 
 		return refactoringSuggestions;
 	}
 
-	private String suggestionsForWmc(SourceFileDTO file) {
-		String suggestions = "";
+	private String getMoveMethodSuggestions(SourceFileDTO file) throws FileNotFoundException {
+		File sourceFile = new File(file.getAbsolutePath());
+		CompilationUnit compilationUnit = StaticJavaParser.parse(sourceFile);
 
-		double wmcThreshold = MetricsThresholdDTO.getWmcThreshold();
-		double wmcValue = file.getWeightedMethodCount();
-		boolean isWmcHigh = wmcValue > wmcThreshold;
+		List<String> suggestions = new ArrayList<>();
+		Map<String, Double> laaMap = file.getLocalityOfAttributeAccess();
 
-		if (!isWmcHigh) {
-			return suggestions;
+		for (MethodDeclaration method : compilationUnit.findAll(MethodDeclaration.class)) {
+			String methodName = method.getNameAsString();
+
+			if (laaMap.containsKey(methodName) && laaMap.get(methodName) < MetricsThresholdDTO.getLaaThreshold()) {
+				int foreignDataProviders = file.getForeignDataProviders().get(methodName);
+
+				if (foreignDataProviders == 1) {
+					String targetClass = findTargetClass(method);
+					String suggestion = getMoveMethodSuggestionAsString(methodName, targetClass);
+					suggestions.add(suggestion);
+				}
+			}
 		}
 
-		suggestions = "WMC: The class has " + wmcValue + " methods. Group related methods into separate classes.";
-
-		return suggestions;
+		return String.join(" | ", suggestions);
 	}
 
-	private String suggestionsForHfda(SourceFileDTO file) {
-		String suggestions = "";
-
-		int atfdThreshold = MetricsThresholdDTO.getAtfdThreshold();
-		int atfdValue = file.getAccessToForeignData();
-		boolean isAtfdHigh = atfdValue > atfdThreshold;
-
-		if (!isAtfdHigh) {
-			return suggestions;
-		}
-
-		suggestions = "ATFD: Accesses " + atfdValue + " foreign classes. Move logic closer to data.";
-
-		return suggestions;
+	private String getMoveMethodSuggestionAsString(String methodName, String targetClass) {
+		String suggestion = "Method [" + methodName + "] is tightly coupled with " + targetClass
+				+ ". Move this method to " + targetClass + ".";
+		return suggestion;
 	}
 
-	private String suggestionsForTcc(SourceFileDTO file) throws Exception {
+	private String findTargetClass(MethodDeclaration method) {
+		Map<String, Integer> providerCounts = new HashMap<>();
+
+		method.findAll(FieldAccessExpr.class).forEach(fa -> {
+			String scope = fa.getScope().toString();
+			if (!scope.equals("this")) {
+				providerCounts.put(scope, providerCounts.getOrDefault(scope, 0) + 1);
+			}
+		});
+
+		method.findAll(MethodCallExpr.class).forEach(mc -> {
+			if (mc.getNameAsString().startsWith("get") && mc.getScope().isPresent()) {
+				String scope = mc.getScope().get().toString();
+				if (!scope.equals("this")) {
+					providerCounts.put(scope, providerCounts.getOrDefault(scope, 0) + 1);
+				}
+			}
+		});
+
+		return providerCounts.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey)
+				.orElse("UnknownClass");
+	}
+
+	private String getExtractClassSuggestions(SourceFileDTO file) throws Exception {
 		String suggestions = "";
 
 		double tccThreshold = MetricsThresholdDTO.getTccThreshold();
@@ -99,25 +116,27 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 			return suggestions;
 		}
 
-		String className = file.getFileName().replace(".java", "");
+		String className = file.getClassName();
 
 		try {
 			File sourceFile = new File(file.getAbsolutePath());
 			CompilationUnit compilationUnit = StaticJavaParser.parse(sourceFile);
 			Map<MethodDeclaration, Set<String>> methodToFields = analysisService.getMethodToFields(compilationUnit);
 			List<List<String>> methodGroups = groupMethodsBySharedFields(methodToFields);
+			List<List<String>> methodGroupsCleaned = this.filterMethodsForRefactoring(methodGroups);
 
-			boolean hasMultipleGroups = methodGroups.size() > 1;
+			boolean hasMultipleGroups = methodGroupsCleaned.size() > 1;
 
 			if (!hasMultipleGroups) {
 				return suggestions;
 			}
 
 			List<String> groupSuggestions = new ArrayList<>();
-			for (List<String> group : methodGroups) {
-				groupSuggestions.add(buildCohesionSuggestion(group, className));
+			for (List<String> group : methodGroupsCleaned) {
+				groupSuggestions.add(getExtractClassSuggestionAsString(group, className));
 			}
-			suggestions = String.join(" ", groupSuggestions);
+
+			suggestions = String.join(" | ", groupSuggestions);
 
 		} catch (ParseProblemException e) {
 			throw new Exception("Problem on parsing the file.");
@@ -156,9 +175,33 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 		return new ArrayList<>(groupMap.values());
 	}
 
-	private String buildCohesionSuggestion(List<String> methodGroup, String className) {
+	private List<List<String>> filterMethodsForRefactoring(List<List<String>> methodGroups) {
+		List<List<String>> methodGroupsCleaned = new ArrayList<>();
+
+		for (List<String> group : methodGroups) {
+			List<String> groupCleaned = new ArrayList<>();
+			for (String method : group) {
+				if (!isExcludedMethod(method)) {
+					groupCleaned.add(method);
+				}
+			}
+
+			if (!groupCleaned.isEmpty() && groupCleaned.size() > 1) {
+				methodGroupsCleaned.add(groupCleaned);
+			}
+		}
+
+		return methodGroupsCleaned;
+	}
+
+	private boolean isExcludedMethod(String method) {
+		return method.startsWith("get") || method.startsWith("set") || method.startsWith("add")
+				|| method.startsWith("equals") || method.equals("toString") || method.equals("hashCode");
+	}
+
+	private String getExtractClassSuggestionAsString(List<String> methodGroup, String className) {
 		String methodList = String.join(", ", methodGroup);
-		return "TCC: Methods [" + methodList + "] can be extracted to a new class.";
+		return "Methods [" + methodList + "] can be extracted to a new class.";
 	}
 
 	private int find(int[] parent, int i) {

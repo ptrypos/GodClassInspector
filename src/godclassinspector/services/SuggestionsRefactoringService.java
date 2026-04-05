@@ -6,5 +6,5 @@ import java.util.Map;
 import godclassinspector.model.SourceFileDTO;
 
 public interface SuggestionsRefactoringService {
-	Map<String, String> suggestRefactoring(List<SourceFileDTO> files) throws Exception;
+	Map<String, Map<String, String>> suggestRefactoring(List<SourceFileDTO> files) throws Exception;
 }

@@ -156,7 +156,12 @@
 	         class="godclassinspector.ui.UmlDiagramUI"
 	         id="godclassinspector.ui.umlDiagram"
 	         name="UML With God Classes">
-	   </view>
+	   	</view>
+	   	<view
+	         id="godclassinspector.ui.refactoringSuggestions"
+	         name="Refactoring Suggestions"
+	         class="godclassinspector.ui.RefactoringSuggestionsUI">
+   		</view>
 	</extension>
 
 </plugin>

@@ -1,31 +1,35 @@
 package godclassinspector.model;
 
 import java.io.File;
+import java.util.Map;
 
 public class SourceFileDTO {
 
-	private String fileName;
+	private String className;
 	private String absolutePath;
 	private String parentPackageName;
 	private long fileSize;
 	private int weightedMethodCount;
 	private int accessToForeignData;
 	private double tightClassCohesion;
+	private Map<String, Double> localityOfAttributeAccess;
+	private Map<String, Integer> foreignDataProviders;
 	private boolean isGodClass;
 
 	public SourceFileDTO(File file, String parentPackageName) {
-		this.fileName = file.getName();
+		this.className = file.getName();
+		this.className = this.className.replace(".java", "");
 		this.absolutePath = file.getAbsolutePath();
 		this.parentPackageName = parentPackageName;
 		this.fileSize = file.length();
 	}
 
-	public String getFileName() {
-		return fileName;
+	public String getClassName() {
+		return className;
 	}
 
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
+	public void setClassName(String fileName) {
+		this.className = fileName;
 	}
 
 	public String getAbsolutePath() {
@@ -75,6 +79,23 @@ public class SourceFileDTO {
 	public void setTightClassCohesion(double tightClassCohesion) {
 		this.tightClassCohesion = tightClassCohesion;
 	}
+	
+	public Map<String, Double> getLocalityOfAttributeAccess() {
+		return localityOfAttributeAccess;
+	}
+
+	public void setLocalityOfAttributeAccess(Map<String, Double> methodLocalityOfAttributeAccess) {
+		this.localityOfAttributeAccess = methodLocalityOfAttributeAccess;
+	}
+	
+	public Map<String, Integer> getForeignDataProviders() {
+		return foreignDataProviders;
+		
+	}
+	
+	public void setForeignDataProviders(Map<String, Integer> foreignDataProviders) {
+		this.foreignDataProviders = foreignDataProviders;		
+	}
 
 	public boolean isGodClass() {
 		return isGodClass;
@@ -86,7 +107,7 @@ public class SourceFileDTO {
 
 	@Override
 	public String toString() {
-		return "SourceFileDTO [fileName=" + fileName + ", absolutePath=" + absolutePath + ", parentPackageName="
+		return "SourceFileDTO [fileName=" + className + ", absolutePath=" + absolutePath + ", parentPackageName="
 				+ parentPackageName + ", fileSize=" + fileSize + ", weightedMethodCount=" + weightedMethodCount
 				+ ", accessToForeignData=" + accessToForeignData + ", tightClassCohesion=" + tightClassCohesion
 				+ ", isGodClass=" + isGodClass + "]";

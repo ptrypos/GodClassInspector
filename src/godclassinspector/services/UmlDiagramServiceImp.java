@@ -56,7 +56,7 @@ public class UmlDiagramServiceImp implements UmlDiagramService {
 	}
 
 	private ClassDTO createClassDto(SourceFileDTO file) {
-		String className = file.getFileName();
+		String className = file.getClassName();
 		String packageName = file.getParentPackageName();
 
 		ClassDTO projectClass = new ClassDTO(className, packageName);

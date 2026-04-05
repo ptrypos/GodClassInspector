@@ -1,6 +1,7 @@
 package godclassinspector.handlers;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -8,6 +9,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import godclassinspector.model.ClassDTO;
@@ -20,6 +22,7 @@ import godclassinspector.services.SuggestionsRefactoringServiceImp;
 import godclassinspector.services.UmlDiagramService;
 import godclassinspector.services.UmlDiagramServiceImp;
 import godclassinspector.ui.FoundFilesUI;
+import godclassinspector.ui.RefactoringSuggestionsUI;
 import godclassinspector.ui.UmlDiagramUI;
 
 public class AnalyzeHandler extends AbstractHandler {
@@ -36,26 +39,59 @@ public class AnalyzeHandler extends AbstractHandler {
 		FoundFilesUI foundFilesUI = ScanResultsDTO.getView();
 
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
-
 		IWorkbenchPage page = window.getActivePage();
 
 		try {
 			analysisService.checkGodClass(projectDiscoveredFilesList);
-			List<ClassDTO> projectClassesList = umlDiagramService.extractClassesFeatures(projectDiscoveredFilesList);
-			//Map<String, String> suggestions = suggestionsRefactoring.suggestRefactoring(projectDiscoveredFilesList);
 
-			foundFilesUI.setInput(projectDiscoveredFilesList);
+			List<ClassDTO> projectClassesList = umlDiagramService
+				.extractClassesFeatures(projectDiscoveredFilesList);
 
-			UmlDiagramUI umlView = (UmlDiagramUI) page.showView("godclassinspector.ui.umlDiagram");
-			if (umlView != null) {
-			    umlView.generateUML(projectClassesList);
-			}
+			Map<String, Map<String, String>> suggestionsMap = suggestionsRefactoring
+				.suggestRefactoring(projectDiscoveredFilesList);
+
+			displayResults(
+				page,
+				foundFilesUI,
+				projectDiscoveredFilesList,
+				projectClassesList,
+				suggestionsMap,
+				event
+			);
 
 		} catch (Exception e) {
-			MessageDialog.openError(HandlerUtil.getActiveShell(event), "Analyze Error", e.getMessage());
+			MessageDialog.openError(
+				HandlerUtil.getActiveShell(event),
+				"Analyze Error",
+				"An error occurred during analysis: " + e.getMessage()
+			);
 		}
 
 		return null;
+	}
+
+	private void displayResults(IWorkbenchPage page, FoundFilesUI foundFilesUI,
+			List<SourceFileDTO> projectDiscoveredFilesList, List<ClassDTO> projectClassesList,
+			Map<String, Map<String, String>> suggestionsMap, ExecutionEvent event) throws PartInitException {
+
+		foundFilesUI.setInput(projectDiscoveredFilesList);
+
+		UmlDiagramUI umlView = (UmlDiagramUI) page.showView("godclassinspector.ui.umlDiagram");
+		if (umlView != null) {
+			umlView.generateUML(projectClassesList);
+		}
+
+		RefactoringSuggestionsUI suggestionsView = (RefactoringSuggestionsUI) page.showView("godclassinspector.ui.refactoringSuggestions");
+		if (suggestionsView != null) {
+			suggestionsView.setInput(suggestionsMap);
+		} else {
+			MessageDialog.openWarning(
+				HandlerUtil.getActiveShell(event),
+				"View Not Found",
+				"Refactoring Suggestions view could not be opened. " +
+				"Ensure it is registered in plugin.xml"
+			);
+		}
 	}
 
 	@Override

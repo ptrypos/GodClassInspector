@@ -75,7 +75,7 @@ public class FoundFilesUI extends ViewPart {
 	            SourceFileDTO file = (SourceFileDTO) element;
 
 	            switch (columnNumber) {
-	                case 0: return file.getFileName();
+	                case 0: return (file.getClassName() + ".java");
 	                case 1: return file.getParentPackageName();
 	                case 2: return file.getAbsolutePath();
 	                case 3: return Integer.toString(file.getWeightedMethodCount());
