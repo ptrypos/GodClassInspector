@@ -4,5 +4,6 @@ public enum NodeType {
     ROOT,
     CLASS,
     REFACTORING_TYPE,
-    METHOD
+    METHOD,
+    DETAIL
 }

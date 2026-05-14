@@ -152,9 +152,7 @@ public class AnalysisServiceImp implements AnalysisService {
 		List<MethodCallExpr> methodsCalled = compilationUnit.findAll(MethodCallExpr.class);
 		List<FieldAccessExpr> accessedFields = compilationUnit.findAll(FieldAccessExpr.class);
 
-		Set<String> foreignClasses = new HashSet<>();
-
-		int accessToForeignData = 0;
+		int accessToForeignDataCounter = 0;
 
 		for (MethodCallExpr call : methodsCalled) {
 			if (call.getNameAsString().startsWith("get")) {
@@ -162,7 +160,7 @@ public class AnalysisServiceImp implements AnalysisService {
 					String classParent = call.getScope().get().toString();
 
 					if(!classParent.equals("this")) {
-						foreignClasses.add(classParent);
+						accessToForeignDataCounter++;
 					}
 				}
 			}
@@ -172,12 +170,11 @@ public class AnalysisServiceImp implements AnalysisService {
 			String classParent = field.getScope().toString();
 
 			if (!classParent.equals("this")) {
-				foreignClasses.add(classParent);
+				accessToForeignDataCounter++;
 			}
 		}
 
-		accessToForeignData = foreignClasses.size();
-		return accessToForeignData;
+		return accessToForeignDataCounter;
 	}
 
 	private double calculateTightClassCohesion(CompilationUnit compilationUnit) {
