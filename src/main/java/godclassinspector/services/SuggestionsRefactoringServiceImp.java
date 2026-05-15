@@ -79,7 +79,6 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 		int extractMethodThreshold = MetricsThresholdDTO.getExtractMethodThreshold();
 
 		for (MethodDeclaration method : compilationUnit.findAll(MethodDeclaration.class)) {
-			// Skip excluded methods (getters, setters, etc.)
 			if (isExcludedMethod(method.getNameAsString())) {
 				continue;
 			}
@@ -88,7 +87,6 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 			Integer complexity = methodComplexity.get(methodName);
 
 			if (complexity != null && complexity >= extractMethodThreshold) {
-				// Identify complex code blocks within the method
 				List<String> complexBlocks = identifyComplexCodeBlocks(method);
 
 				if (!complexBlocks.isEmpty()) {
