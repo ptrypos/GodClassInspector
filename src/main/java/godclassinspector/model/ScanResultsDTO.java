@@ -5,14 +5,14 @@ import java.util.List;
 import godclassinspector.ui.FoundFilesUI;
 
 public class ScanResultsDTO {
-	private static List<SourceFileDTO> foundFiles;
+	private static List<ClassDTO> foundFiles;
 	private static FoundFilesUI foundFilesUiObject;
 
-	public static void setFiles(List<SourceFileDTO> files) {
+	public static void setFiles(List<ClassDTO> files) {
 		foundFiles = files;
 	}
 
-	public static List<SourceFileDTO> getFiles() {
+	public static List<ClassDTO> getFiles() {
 		return foundFiles;
 	}
 

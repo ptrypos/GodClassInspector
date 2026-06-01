@@ -20,7 +20,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.ViewPart;
 
-import godclassinspector.model.SourceFileDTO;
+import godclassinspector.model.ClassDTO;
 
 public class FoundFilesUI extends ViewPart {
 
@@ -47,7 +47,7 @@ public class FoundFilesUI extends ViewPart {
 		this.foundFilesViewer.setContentProvider(ArrayContentProvider.getInstance());
 	}
 
-	public void setInput(List<SourceFileDTO> projectDiscoveredFiles) {
+	public void setInput(List<ClassDTO> projectDiscoveredFiles) {
 		this.foundFilesViewer.setInput(projectDiscoveredFiles);
 	}
 
@@ -72,7 +72,7 @@ public class FoundFilesUI extends ViewPart {
 	    return new ColumnLabelProvider() {
 	        @Override
 	        public String getText(Object element) {
-	            SourceFileDTO file = (SourceFileDTO) element;
+	            ClassDTO file = (ClassDTO) element;
 
 	            switch (columnNumber) {
 	                case 0: return (file.getClassName() + ".java");
@@ -87,7 +87,7 @@ public class FoundFilesUI extends ViewPart {
 
 	        @Override
 	        public org.eclipse.swt.graphics.Color getBackground(Object element) {
-	            SourceFileDTO file = (SourceFileDTO) element;
+	            ClassDTO file = (ClassDTO) element;
 
 	            if (file.isGodClass()) {
 	                return org.eclipse.swt.widgets.Display.getCurrent().getSystemColor(SWT.COLOR_INFO_BACKGROUND);
@@ -97,7 +97,7 @@ public class FoundFilesUI extends ViewPart {
 
 	        @Override
 	        public org.eclipse.swt.graphics.Color getForeground(Object element) {
-	            SourceFileDTO file = (SourceFileDTO) element;
+	            ClassDTO file = (ClassDTO) element;
 
 	            if (file.isGodClass()) {
 	                return org.eclipse.swt.widgets.Display.getCurrent().getSystemColor(SWT.COLOR_RED);
@@ -111,8 +111,8 @@ public class FoundFilesUI extends ViewPart {
 		IStructuredSelection selection = (IStructuredSelection) event.getSelection();
 		Object firstElement = selection.getFirstElement();
 
-		if (firstElement instanceof SourceFileDTO) {
-			SourceFileDTO selectedFile = (SourceFileDTO) firstElement;
+		if (firstElement instanceof ClassDTO) {
+			ClassDTO selectedFile = (ClassDTO) firstElement;
 			openFileInEclipseEditor(selectedFile.getAbsolutePath());
 		}
 	}

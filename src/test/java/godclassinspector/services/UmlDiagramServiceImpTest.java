@@ -16,8 +16,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import godclassinspector.model.UmlClassDTO;
 import godclassinspector.model.ClassDTO;
-import godclassinspector.model.SourceFileDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UmlDiagramServiceImpTest {
@@ -51,16 +51,16 @@ public class UmlDiagramServiceImpTest {
 				+ "protected void protectedMethod() {}\n" + "}";
 		Files.write(tempFile.toPath(), content.getBytes());
 
-		SourceFileDTO sourceFile = new SourceFileDTO(tempFile, "com.example");
+		ClassDTO sourceFile = new ClassDTO(tempFile, "com.example");
 		sourceFile.setGodClass(true);
-		List<SourceFileDTO> files = new ArrayList<>();
+		List<ClassDTO> files = new ArrayList<>();
 		files.add(sourceFile);
 
-		List<ClassDTO> result = umlDiagramService.extractClassesFeatures(files);
+		List<UmlClassDTO> result = umlDiagramService.extractClassesFeatures(files);
 
 		assertNotNull(result);
 		assertEquals(1, result.size());
-		ClassDTO classDto = result.get(0);
+		UmlClassDTO classDto = result.get(0);
 		assertEquals(sourceFile.getClassName(), classDto.getClassName());
 		assertEquals("com.example", classDto.getPackageName());
 		assertEquals(3, classDto.getFields().size());
@@ -78,11 +78,11 @@ public class UmlDiagramServiceImpTest {
 		String content = "package com.example;\npublic interface TestInterface { void method1(); }";
 		Files.write(tempFile.toPath(), content.getBytes());
 
-		SourceFileDTO sourceFile = new SourceFileDTO(tempFile, "com.example");
-		List<SourceFileDTO> files = new ArrayList<>();
+		ClassDTO sourceFile = new ClassDTO(tempFile, "com.example");
+		List<ClassDTO> files = new ArrayList<>();
 		files.add(sourceFile);
 
-		List<ClassDTO> result = umlDiagramService.extractClassesFeatures(files);
+		List<UmlClassDTO> result = umlDiagramService.extractClassesFeatures(files);
 
 		assertNotNull(result);
 		assertEquals(1, result.size());
@@ -96,11 +96,11 @@ public class UmlDiagramServiceImpTest {
 		String content = "package com.example;\npublic abstract class TestAbstract extends BaseClass { abstract void method1(); }";
 		Files.write(tempFile.toPath(), content.getBytes());
 
-		SourceFileDTO sourceFile = new SourceFileDTO(tempFile, "com.example");
-		List<SourceFileDTO> files = new ArrayList<>();
+		ClassDTO sourceFile = new ClassDTO(tempFile, "com.example");
+		List<ClassDTO> files = new ArrayList<>();
 		files.add(sourceFile);
 
-		List<ClassDTO> result = umlDiagramService.extractClassesFeatures(files);
+		List<UmlClassDTO> result = umlDiagramService.extractClassesFeatures(files);
 
 		assertNotNull(result);
 		assertEquals(1, result.size());
@@ -110,9 +110,9 @@ public class UmlDiagramServiceImpTest {
 
 	@Test
 	public void testExtractClassesFeatures_WithEmptyFileList() throws Exception {
-		List<SourceFileDTO> files = new ArrayList<>();
+		List<ClassDTO> files = new ArrayList<>();
 
-		List<ClassDTO> result = umlDiagramService.extractClassesFeatures(files);
+		List<UmlClassDTO> result = umlDiagramService.extractClassesFeatures(files);
 
 		assertNotNull(result);
 		assertTrue(result.isEmpty());
@@ -125,11 +125,11 @@ public class UmlDiagramServiceImpTest {
 		String content = "package com.example;\npublic class StaticTest { public static String staticField; public static void staticMethod() {} }";
 		Files.write(tempFile.toPath(), content.getBytes());
 
-		SourceFileDTO sourceFile = new SourceFileDTO(tempFile, "com.example");
-		List<SourceFileDTO> files = new ArrayList<>();
+		ClassDTO sourceFile = new ClassDTO(tempFile, "com.example");
+		List<ClassDTO> files = new ArrayList<>();
 		files.add(sourceFile);
 
-		List<ClassDTO> result = umlDiagramService.extractClassesFeatures(files);
+		List<UmlClassDTO> result = umlDiagramService.extractClassesFeatures(files);
 
 		assertNotNull(result);
 		assertEquals(1, result.size());

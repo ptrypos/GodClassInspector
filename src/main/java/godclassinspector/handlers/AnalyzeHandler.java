@@ -12,11 +12,11 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import godclassinspector.model.ClassDTO;
+import godclassinspector.model.UmlClassDTO;
 import godclassinspector.model.ScanResultsDTO;
-import godclassinspector.model.SourceFileDTO;
-import godclassinspector.services.AnalysisService;
-import godclassinspector.services.AnalysisServiceImp;
+import godclassinspector.model.ClassDTO;
+import godclassinspector.services.DetectionService;
+import godclassinspector.services.DetectionServiceImp;
 import godclassinspector.services.SuggestionsRefactoringService;
 import godclassinspector.services.SuggestionsRefactoringServiceImp;
 import godclassinspector.services.UmlDiagramService;
@@ -27,7 +27,7 @@ import godclassinspector.ui.UmlDiagramUI;
 
 public class AnalyzeHandler extends AbstractHandler {
 
-	private final AnalysisService analysisService = new AnalysisServiceImp();
+	private final DetectionService detectionService = new DetectionServiceImp();
 	private final UmlDiagramService umlDiagramService = new UmlDiagramServiceImp();
 	private final SuggestionsRefactoringService suggestionsRefactoring = new SuggestionsRefactoringServiceImp();
 
@@ -35,20 +35,20 @@ public class AnalyzeHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		List<SourceFileDTO> projectDiscoveredFilesList = ScanResultsDTO.getFiles();
+		List<ClassDTO> projectDiscoveredFilesList = ScanResultsDTO.getFiles();
 		FoundFilesUI foundFilesUI = ScanResultsDTO.getView();
 
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
 		IWorkbenchPage page = window.getActivePage();
 
 		try {
-			analysisService.checkGodClass(projectDiscoveredFilesList);
-
-			List<ClassDTO> projectClassesList = umlDiagramService
-				.extractClassesFeatures(projectDiscoveredFilesList);
+			detectionService.checkGodClass(projectDiscoveredFilesList);
 
 			Map<String, Map<String, String>> suggestionsMap = suggestionsRefactoring
-				.suggestRefactoring(projectDiscoveredFilesList);
+					.suggestRefactoring(projectDiscoveredFilesList);
+			
+			List<UmlClassDTO> projectClassesList = umlDiagramService
+				.extractClassesFeatures(projectDiscoveredFilesList);
 
 			displayResults(
 				page,
@@ -71,7 +71,7 @@ public class AnalyzeHandler extends AbstractHandler {
 	}
 
 	private void displayResults(IWorkbenchPage page, FoundFilesUI foundFilesUI,
-			List<SourceFileDTO> projectDiscoveredFilesList, List<ClassDTO> projectClassesList,
+			List<ClassDTO> projectDiscoveredFilesList, List<UmlClassDTO> projectClassesList,
 			Map<String, Map<String, String>> suggestionsMap, ExecutionEvent event) throws PartInitException {
 
 		foundFilesUI.setInput(projectDiscoveredFilesList);

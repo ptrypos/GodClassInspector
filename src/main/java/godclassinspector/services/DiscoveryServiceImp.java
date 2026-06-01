@@ -15,7 +15,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import godclassinspector.model.SourceFileDTO;
+import godclassinspector.model.ClassDTO;
 
 public class DiscoveryServiceImp implements DiscoveryService {
 
@@ -35,8 +35,8 @@ public class DiscoveryServiceImp implements DiscoveryService {
     }
 
     @Override
-    public List<SourceFileDTO> findAllJavaFiles(IProject project) throws Exception {
-        List<SourceFileDTO> foundFiles = new ArrayList<>();
+    public List<ClassDTO> findAllJavaFiles(IProject project) throws Exception {
+        List<ClassDTO> foundFiles = new ArrayList<>();
         String sourcePath = this.getProjectSourceFolderPath(project);
         if (sourcePath != null) {
         	this.detectJavaFiles(new File(sourcePath), sourcePath, foundFiles);
@@ -44,7 +44,7 @@ public class DiscoveryServiceImp implements DiscoveryService {
         return foundFiles;
     }
 
-    private void detectJavaFiles(File root, String sourcePath, List<SourceFileDTO> foundFiles) {
+    private void detectJavaFiles(File root, String sourcePath, List<ClassDTO> foundFiles) {
         File[] files = root.listFiles();
 
         if (files == null) {
@@ -56,7 +56,7 @@ public class DiscoveryServiceImp implements DiscoveryService {
             	this.detectJavaFiles(file, sourcePath, foundFiles);
             } else if (file.getName().endsWith(".java")) {
             	String packageParent = this.getJavaFileParentPackage(sourcePath, file.getAbsolutePath(), file.getName());
-            	foundFiles.add(new SourceFileDTO(file, packageParent));
+            	foundFiles.add(new ClassDTO(file, packageParent));
             }
         }
     }

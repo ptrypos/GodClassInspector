@@ -1,56 +1,101 @@
 package godclassinspector.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.util.Map;
 
 public class ClassDTO {
 
 	private String className;
-	private String packageName;
-	private boolean isInterface;
-	private boolean isAbstract;
+	private String absolutePath;
+	private String parentPackageName;
+	private long fileSize;
+	private int weightedMethodCount;
+	private int accessToForeignData;
+	private double tightClassCohesion;
+	private Map<String, Double> localityOfAttributeAccess;
+	private Map<String, Integer> foreignDataProviders;
 	private boolean isGodClass;
-	private String superClassName;
-	private List<String> implementedInterfaces = new ArrayList<>();
-	private List<String> dependencies = new ArrayList<>();
-	private List<String> fields;
-	private List<String> methods;
+	private boolean isUnrefactableClass;
 
-	public ClassDTO(String className, String packageName) {
-		this.className = className;
-		this.packageName = packageName;
+	public ClassDTO(File file, String parentPackageName) {
+		this.className = file.getName();
+		this.className = this.className.replace(".java", "");
+		this.absolutePath = file.getAbsolutePath();
+		this.parentPackageName = parentPackageName;
+		this.fileSize = file.length();
 	}
 
 	public String getClassName() {
 		return className;
 	}
 
-	public void setClassName(String className) {
-		this.className = className;
+	public void setClassName(String fileName) {
+		this.className = fileName;
 	}
 
-	public String getPackageName() {
-		return packageName;
+	public String getAbsolutePath() {
+		return absolutePath;
 	}
 
-	public void setPackageName(String packageName) {
-		this.packageName = packageName;
+	public void setAbsolutePath(String absolutePath) {
+		this.absolutePath = absolutePath;
 	}
 
-	public boolean isInterface() {
-		return isInterface;
+	public String getParentPackageName() {
+		return parentPackageName;
 	}
 
-	public void setInterface(boolean isInterface) {
-		this.isInterface = isInterface;
+	public void setParentPackageName(String parentPackageName) {
+		this.parentPackageName = parentPackageName;
 	}
 
-	public boolean isAbstract() {
-		return isAbstract;
+	public long getFileSize() {
+		return fileSize;
 	}
 
-	public void setAbstract(boolean isAbstract) {
-		this.isAbstract = isAbstract;
+	public void setFileSize(long fileSize) {
+		this.fileSize = fileSize;
+	}
+
+	public int getWeightedMethodCount() {
+		return weightedMethodCount;
+	}
+
+	public void setWeightedMethodCount(int weightedMethodCount) {
+		this.weightedMethodCount = weightedMethodCount;
+	}
+
+	public int getAccessToForeignData() {
+		return accessToForeignData;
+	}
+
+	public void setAccessToForeignData(int accessToForeignData) {
+		this.accessToForeignData = accessToForeignData;
+	}
+
+	public double getTightClassCohesion() {
+		return tightClassCohesion;
+	}
+
+	public void setTightClassCohesion(double tightClassCohesion) {
+		this.tightClassCohesion = tightClassCohesion;
+	}
+	
+	public Map<String, Double> getLocalityOfAttributeAccess() {
+		return localityOfAttributeAccess;
+	}
+
+	public void setLocalityOfAttributeAccess(Map<String, Double> methodLocalityOfAttributeAccess) {
+		this.localityOfAttributeAccess = methodLocalityOfAttributeAccess;
+	}
+	
+	public Map<String, Integer> getForeignDataProviders() {
+		return foreignDataProviders;
+		
+	}
+	
+	public void setForeignDataProviders(Map<String, Integer> foreignDataProviders) {
+		this.foreignDataProviders = foreignDataProviders;		
 	}
 
 	public boolean isGodClass() {
@@ -60,52 +105,20 @@ public class ClassDTO {
 	public void setGodClass(boolean isGodClass) {
 		this.isGodClass = isGodClass;
 	}
-
-	public String getSuperClassName() {
-		return superClassName;
+	
+	public boolean isUnrefactableClass() {
+		return isUnrefactableClass;
 	}
-
-	public void setSuperClassName(String superClassName) {
-		this.superClassName = superClassName;
-	}
-
-	public List<String> getImplementedInterfaces() {
-		return implementedInterfaces;
-	}
-
-	public void setImplementedInterfaces(List<String> implementedInterfaces) {
-		this.implementedInterfaces = implementedInterfaces;
-	}
-
-	public List<String> getDependencies() {
-		return dependencies;
-	}
-
-	public void setDependencies(List<String> dependencies) {
-		this.dependencies = dependencies;
-	}
-
-	public List<String> getFields() {
-		return fields;
-	}
-
-	public void setFields(List<String> fields) {
-		this.fields = fields;
-	}
-
-	public List<String> getMethods() {
-		return methods;
-	}
-
-	public void setMethods(List<String> methods) {
-		this.methods = methods;
+	
+	public void setUnrefactableClass(boolean isUnrefactableClass) {
+		this.isUnrefactableClass = isUnrefactableClass;
 	}
 
 	@Override
 	public String toString() {
-		return "ClassDTO [className=" + className + ", packageName=" + packageName + ", isInterface=" + isInterface
-				+ ", isAbstract=" + isAbstract + ", isGodClass=" + isGodClass + ", superClassName=" + superClassName
-				+ ", implementedInterfaces=" + implementedInterfaces + ", dependencies=" + dependencies + ", fields="
-				+ fields + ", methods=" + methods + "]";
+		return "SourceFileDTO [fileName=" + className + ", absolutePath=" + absolutePath + ", parentPackageName="
+				+ parentPackageName + ", fileSize=" + fileSize + ", weightedMethodCount=" + weightedMethodCount
+				+ ", accessToForeignData=" + accessToForeignData + ", tightClassCohesion=" + tightClassCohesion
+				+ ", isGodClass=" + isGodClass + "]";
 	}
 }

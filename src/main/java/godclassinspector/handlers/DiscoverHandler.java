@@ -11,7 +11,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import godclassinspector.model.ScanResultsDTO;
-import godclassinspector.model.SourceFileDTO;
+import godclassinspector.model.ClassDTO;
 import godclassinspector.services.DiscoveryService;
 import godclassinspector.services.DiscoveryServiceImp;
 import godclassinspector.ui.FoundFilesUI;
@@ -24,7 +24,7 @@ public class DiscoverHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
 			IProject project = discoveryService.detectProject(event);
-			List<SourceFileDTO> projectDiscoveredFiles = discoveryService.findAllJavaFiles(project);
+			List<ClassDTO> projectDiscoveredFiles = discoveryService.findAllJavaFiles(project);
 
 			IWorkbenchPage filesFoundWindow = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage();
 			FoundFilesUI foundFilesUI = (FoundFilesUI) filesFoundWindow.showView("godclassinspector.ui.foundFiles");

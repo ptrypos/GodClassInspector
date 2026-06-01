@@ -18,7 +18,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import godclassinspector.model.SourceFileDTO;
+import godclassinspector.model.ClassDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SuggestionsRefactoringServiceImpTest {
@@ -26,8 +26,8 @@ public class SuggestionsRefactoringServiceImpTest {
 	@InjectMocks
 	private SuggestionsRefactoringServiceImp suggestionsService;
 
-	private SourceFileDTO godClass;
-	private SourceFileDTO normalClass;
+	private ClassDTO godClass;
+	private ClassDTO normalClass;
 	private File godFile;
 	private File normalFile;
 
@@ -42,7 +42,7 @@ public class SuggestionsRefactoringServiceImpTest {
 				+ "    public void methodB() { y = 1; }\n" + "    public void methodC() { y = 1; }\n" + "}";
 		Files.write(godFile.toPath(), complexCode.getBytes());
 
-		godClass = new SourceFileDTO(godFile, "godclassinspector.services");
+		godClass = new ClassDTO(godFile, "godclassinspector.services");
 		godClass.setGodClass(true);
 		godClass.setTightClassCohesion(0.1);
 
@@ -57,7 +57,7 @@ public class SuggestionsRefactoringServiceImpTest {
 		normalFile = File.createTempFile("NormalClass", ".java");
 		Files.write(normalFile.toPath(), "public class NormalClass { public void method() {} }".getBytes());
 
-		normalClass = new SourceFileDTO(normalFile, "godclassinspector.services");
+		normalClass = new ClassDTO(normalFile, "godclassinspector.services");
 		normalClass.setGodClass(false);
 	}
 
@@ -73,7 +73,7 @@ public class SuggestionsRefactoringServiceImpTest {
 
 	@Test
 	public void testSuggestRefactoring_WithGodClasses() throws Exception {
-		List<SourceFileDTO> files = new ArrayList<>();
+		List<ClassDTO> files = new ArrayList<>();
 		files.add(godClass);
 		files.add(normalClass);
 
@@ -90,7 +90,7 @@ public class SuggestionsRefactoringServiceImpTest {
 
 	@Test
 	public void testSuggestRefactoring_WithNormalClassesOnly() throws Exception {
-		List<SourceFileDTO> files = new ArrayList<>();
+		List<ClassDTO> files = new ArrayList<>();
 		files.add(normalClass);
 
 		Map<String, Map<String, String>> result = suggestionsService.suggestRefactoring(files);
@@ -101,7 +101,7 @@ public class SuggestionsRefactoringServiceImpTest {
 
 	@Test
 	public void testSuggestRefactoring_WithEmptyFileList() throws Exception {
-		List<SourceFileDTO> files = new ArrayList<>();
+		List<ClassDTO> files = new ArrayList<>();
 
 		Map<String, Map<String, String>> result = suggestionsService.suggestRefactoring(files);
 
@@ -112,7 +112,7 @@ public class SuggestionsRefactoringServiceImpTest {
 	@Test(expected = Exception.class)
 	public void testSuggestRefactoring_WithParseProblem() throws Exception {
 		Files.write(godFile.toPath(), "public class { syntax error".getBytes());
-		List<SourceFileDTO> files = new ArrayList<>();
+		List<ClassDTO> files = new ArrayList<>();
 		files.add(godClass);
 
 		suggestionsService.suggestRefactoring(files);

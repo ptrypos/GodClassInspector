@@ -27,7 +27,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import godclassinspector.model.SourceFileDTO;
+import godclassinspector.model.ClassDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DiscoveryServiceImpTest {
@@ -148,7 +148,7 @@ public class DiscoveryServiceImpTest {
             when(mockResource.getLocation()).thenReturn(realLocation);
             when(mockRoot.getPath()).thenReturn(realPath);
 
-            List<SourceFileDTO> result = discoveryService.findAllJavaFiles(mockProject);
+            List<ClassDTO> result = discoveryService.findAllJavaFiles(mockProject);
             
             assertEquals(1, result.size());
             assertEquals("MyClass", result.get(0).getClassName());
@@ -175,7 +175,7 @@ public class DiscoveryServiceImpTest {
             when(mockResource.getLocation()).thenReturn(realLocation);
             when(mockRoot.getPath()).thenReturn(realPath);
 
-            List<SourceFileDTO> result = discoveryService.findAllJavaFiles(mockProject);
+            List<ClassDTO> result = discoveryService.findAllJavaFiles(mockProject);
             
             assertEquals(1, result.size());
             assertEquals("FallbackClass", result.get(0).getClassName());

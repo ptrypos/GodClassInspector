@@ -3,9 +3,9 @@ package godclassinspector.services;
 import java.io.FileNotFoundException;
 import java.util.List;
 
+import godclassinspector.model.UmlClassDTO;
 import godclassinspector.model.ClassDTO;
-import godclassinspector.model.SourceFileDTO;
 
 public interface UmlDiagramService {
-	List<ClassDTO> extractClassesFeatures(List<SourceFileDTO> projectFiles) throws FileNotFoundException;
+	List<UmlClassDTO> extractClassesFeatures(List<ClassDTO> projectFiles) throws FileNotFoundException;
 }

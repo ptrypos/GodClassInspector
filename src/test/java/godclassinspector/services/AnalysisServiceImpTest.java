@@ -21,22 +21,22 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 
 import godclassinspector.model.MetricsThresholdDTO;
-import godclassinspector.model.SourceFileDTO;
+import godclassinspector.model.ClassDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AnalysisServiceImpTest {
 
     @InjectMocks
-    private AnalysisServiceImp analysisService;
+    private DetectionServiceImp analysisService;
 
-    private SourceFileDTO sourceFile;
+    private ClassDTO sourceFile;
     private File tempFile;
 
     @Before
     public void setUp() throws Exception {
         tempFile = File.createTempFile("TestClass", ".java");
         Files.write(tempFile.toPath(), "public class TestClass { private int x; public void method() { x = 1; } }".getBytes());
-        sourceFile = new SourceFileDTO(tempFile, "com.example");
+        sourceFile = new ClassDTO(tempFile, "com.example");
     }
 
     @After
@@ -57,7 +57,7 @@ public class AnalysisServiceImpTest {
             MetricsThresholdDTO.setAtfdThreshold(-1);
             MetricsThresholdDTO.setTccThreshold(1.0);
 
-            List<SourceFileDTO> files = new ArrayList<>();
+            List<ClassDTO> files = new ArrayList<>();
             files.add(sourceFile);
             
             analysisService.checkGodClass(files);
@@ -72,7 +72,7 @@ public class AnalysisServiceImpTest {
 
     @Test
     public void testCheckGodClass_WithNormalClass() throws Exception {
-        List<SourceFileDTO> files = new ArrayList<>();
+        List<ClassDTO> files = new ArrayList<>();
         files.add(sourceFile);
         
         analysisService.checkGodClass(files);
@@ -82,7 +82,7 @@ public class AnalysisServiceImpTest {
 
     @Test
     public void testCheckGodClass_WithEmptyList() throws Exception {
-        List<SourceFileDTO> files = new ArrayList<>();
+        List<ClassDTO> files = new ArrayList<>();
         
         analysisService.checkGodClass(files);
         
@@ -92,7 +92,7 @@ public class AnalysisServiceImpTest {
     @Test(expected = Exception.class)
     public void testCheckGodClass_WithParseProblem() throws Exception {
         Files.write(tempFile.toPath(), "public class { invalid code".getBytes());
-        List<SourceFileDTO> files = new ArrayList<>();
+        List<ClassDTO> files = new ArrayList<>();
         files.add(sourceFile);
         
         analysisService.checkGodClass(files);
@@ -101,7 +101,7 @@ public class AnalysisServiceImpTest {
     @Test(expected = Exception.class)
     public void testCheckGodClass_WithMissingFile() throws Exception {
         tempFile.delete();
-        List<SourceFileDTO> files = new ArrayList<>();
+        List<ClassDTO> files = new ArrayList<>();
         files.add(sourceFile);
         
         analysisService.checkGodClass(files);

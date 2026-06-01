@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import godclassinspector.model.ClassDTO;
+import godclassinspector.model.UmlClassDTO;
 
 public class PlantUmlBuilder {
 
@@ -54,17 +54,17 @@ public class PlantUmlBuilder {
 		return this;
 	}
 
-	public String build(List<ClassDTO> classList) {
+	public String build(List<UmlClassDTO> classList) {
 		if (classList == null || classList.isEmpty()) {
 			return "";
 		}
 
-		List<ClassDTO> interfaces = filter(classList, true, false, false);
-		List<ClassDTO> abstracts = filter(classList, false, true, false);
-		List<ClassDTO> regular = filter(classList, false, false, false);
-		List<ClassDTO> godClasses = filterGodClasses(classList);
+		List<UmlClassDTO> interfaces = filter(classList, true, false, false);
+		List<UmlClassDTO> abstracts = filter(classList, false, true, false);
+		List<UmlClassDTO> regular = filter(classList, false, false, false);
+		List<UmlClassDTO> godClasses = filterGodClasses(classList);
 
-		Comparator<ClassDTO> alpha = Comparator.comparing(c -> cleanName(c.getClassName()));
+		Comparator<UmlClassDTO> alpha = Comparator.comparing(c -> cleanName(c.getClassName()));
 		interfaces.sort(alpha);
 		abstracts.sort(alpha);
 		regular.sort(alpha);
@@ -78,7 +78,7 @@ public class PlantUmlBuilder {
 		appendSection(sb, "' ── Classes ─────────────────────────────────────\n", regular);
 		appendSection(sb, "' ── God Classes ─────────────────────────────────\n", godClasses);
 
-		for (ClassDTO dto : classList) {
+		for (UmlClassDTO dto : classList) {
 			appendRelationships(sb, dto, classList);
 		}
 
@@ -108,6 +108,7 @@ public class PlantUmlBuilder {
 		appendClassSkinParams(sb);
 		appendInterfaceSkinParams(sb);
 		appendGodClassSkinParams(sb);
+		appendUnrefactableClassParams(sb);
 		sb.append("skinparam classAttributeIconSize 0\n");
 		sb.append("set namespaceSeparator none\n\n");
 	}
@@ -134,21 +135,38 @@ public class PlantUmlBuilder {
 		sb.append("  FontColor #CC0000\n");
 		sb.append("}\n");
 	}
+	
+	private void appendUnrefactableClassParams(StringBuilder sb) {
+		sb.append("skinparam class<<Unrefactable Large Class>> {\n");
+		sb.append("  BackgroundColor #FFFF66\n");
+		sb.append("  BorderColor #CCAA00\n");
+		sb.append("  FontColor #CCAA00\n");
+		sb.append("}\n");
+	}
 
-	private void appendSection(StringBuilder sb, String comment, List<ClassDTO> classes) {
+	private void appendSection(StringBuilder sb, String comment, List<UmlClassDTO> classes) {
 		if (classes.isEmpty()) {
 			return;
 		}
 		sb.append(comment);
-		for (ClassDTO dto : classes) {
+		for (UmlClassDTO dto : classes) {
 			appendClassBlock(sb, dto);
 		}
 	}
 
-	private void appendClassBlock(StringBuilder sb, ClassDTO dto) {
+	private void appendClassBlock(StringBuilder sb, UmlClassDTO dto) {
 		String name = cleanName(dto.getClassName());
 		String type = resolveType(dto);
-		String stereo = dto.isGodClass() ? " <<GodClass>>" : "";
+		String stereo;
+		
+		if (dto.isGodClass()) {
+			stereo = " <<GodClass>>";
+		} else if (dto.isUnrefactableClass()) {
+			stereo = " <<Unrefactable Large Class>>";
+		} else {
+			stereo = "";
+		}
+		
 		sb.append(type);
 		sb.append(quoted(name));
 		sb.append(stereo);
@@ -170,14 +188,14 @@ public class PlantUmlBuilder {
 		}
 	}
 
-	private void appendRelationships(StringBuilder sb, ClassDTO dto, List<ClassDTO> all) {
+	private void appendRelationships(StringBuilder sb, UmlClassDTO dto, List<UmlClassDTO> all) {
 		String current = cleanName(dto.getClassName());
 		appendInheritance(sb, dto, current);
 		appendInterfaceRealisations(sb, dto, current);
 		appendDependencies(sb, dto, current, all);
 	}
 
-	private void appendInheritance(StringBuilder sb, ClassDTO dto, String current) {
+	private void appendInheritance(StringBuilder sb, UmlClassDTO dto, String current) {
 		if (dto.getSuperClassName() == null) {
 			return;
 		}
@@ -188,7 +206,7 @@ public class PlantUmlBuilder {
 		sb.append("\n");
 	}
 
-	private void appendInterfaceRealisations(StringBuilder sb, ClassDTO dto, String current) {
+	private void appendInterfaceRealisations(StringBuilder sb, UmlClassDTO dto, String current) {
 		for (String iface : dto.getImplementedInterfaces()) {
 			String cleanIface = cleanName(iface);
 			sb.append(quoted(cleanIface));
@@ -198,7 +216,7 @@ public class PlantUmlBuilder {
 		}
 	}
 
-	private void appendDependencies(StringBuilder sb, ClassDTO dto, String current, List<ClassDTO> all) {
+	private void appendDependencies(StringBuilder sb, UmlClassDTO dto, String current, List<UmlClassDTO> all) {
 		if (dto.getDependencies() == null) {
 			return;
 		}
@@ -215,24 +233,24 @@ public class PlantUmlBuilder {
 		}
 	}
 
-	private static List<ClassDTO> filter(List<ClassDTO> list, boolean isInterface, boolean isAbstract, boolean isGod) {
-		Stream<ClassDTO> stream = list.stream();
-		Predicate<ClassDTO> matchesInterface = c -> c.isInterface() == isInterface;
-		Predicate<ClassDTO> matchesAbstract = c -> c.isAbstract() == isAbstract;
-		Predicate<ClassDTO> matchesGod = c -> c.isGodClass() == isGod;
-		Predicate<ClassDTO> combined = matchesInterface.and(matchesAbstract).and(matchesGod);
+	private static List<UmlClassDTO> filter(List<UmlClassDTO> list, boolean isInterface, boolean isAbstract, boolean isGod) {
+		Stream<UmlClassDTO> stream = list.stream();
+		Predicate<UmlClassDTO> matchesInterface = c -> c.isInterface() == isInterface;
+		Predicate<UmlClassDTO> matchesAbstract = c -> c.isAbstract() == isAbstract;
+		Predicate<UmlClassDTO> matchesGod = c -> c.isGodClass() == isGod;
+		Predicate<UmlClassDTO> combined = matchesInterface.and(matchesAbstract).and(matchesGod);
 		return stream.filter(combined).collect(Collectors.toList());
 	}
 
-	private static List<ClassDTO> filterGodClasses(List<ClassDTO> list) {
-		Stream<ClassDTO> stream = list.stream();
-		Predicate<ClassDTO> isGod = ClassDTO::isGodClass;
+	private static List<UmlClassDTO> filterGodClasses(List<UmlClassDTO> list) {
+		Stream<UmlClassDTO> stream = list.stream();
+		Predicate<UmlClassDTO> isGod = UmlClassDTO::isGodClass;
 		return stream.filter(isGod).collect(Collectors.toList());
 	}
 
-	private static boolean isInList(String name, List<ClassDTO> list) {
-		Stream<ClassDTO> stream = list.stream();
-		Predicate<ClassDTO> nameMatches = c -> cleanName(c.getClassName()).equals(name);
+	private static boolean isInList(String name, List<UmlClassDTO> list) {
+		Stream<UmlClassDTO> stream = list.stream();
+		Predicate<UmlClassDTO> nameMatches = c -> cleanName(c.getClassName()).equals(name);
 		return stream.anyMatch(nameMatches);
 	}
 
@@ -247,7 +265,7 @@ public class PlantUmlBuilder {
 		return "\"" + name + "\"";
 	}
 
-	private static String resolveType(ClassDTO dto) {
+	private static String resolveType(UmlClassDTO dto) {
 		if (dto.isInterface()) {
 			return "interface ";
 		}

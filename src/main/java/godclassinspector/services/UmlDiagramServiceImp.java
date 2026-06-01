@@ -12,8 +12,8 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 
+import godclassinspector.model.UmlClassDTO;
 import godclassinspector.model.ClassDTO;
-import godclassinspector.model.SourceFileDTO;
 
 public class UmlDiagramServiceImp implements UmlDiagramService {
 
@@ -22,11 +22,11 @@ public class UmlDiagramServiceImp implements UmlDiagramService {
 	private final String PROTECTED_SYMBOL = "#";
 
 	@Override
-	public List<ClassDTO> extractClassesFeatures(List<SourceFileDTO> projectFiles) throws FileNotFoundException {
-		List<ClassDTO> projectClassesList = new ArrayList<>();
+	public List<UmlClassDTO> extractClassesFeatures(List<ClassDTO> projectFiles) throws FileNotFoundException {
+		List<UmlClassDTO> projectClassesList = new ArrayList<>();
 
-		for (SourceFileDTO fileData : projectFiles) {
-			ClassDTO projectClass = this.createClassDto(fileData);
+		for (ClassDTO fileData : projectFiles) {
+			UmlClassDTO projectClass = this.createClassDto(fileData);
 
 			File projectFile = new File(fileData.getAbsolutePath());
 
@@ -46,6 +46,7 @@ public class UmlDiagramServiceImp implements UmlDiagramService {
 			List<String> extractedClassMethods = this.extractClassMethod(compilationUnit);
 
 			projectClass.setGodClass(fileData.isGodClass());
+			projectClass.setUnrefactableClass(fileData.isUnrefactableClass());
 			projectClass.setFields(extractedClassFields);
 			projectClass.setMethods(extractedClassMethods);
 
@@ -55,11 +56,11 @@ public class UmlDiagramServiceImp implements UmlDiagramService {
 		return projectClassesList;
 	}
 
-	private ClassDTO createClassDto(SourceFileDTO file) {
+	private UmlClassDTO createClassDto(ClassDTO file) {
 		String className = file.getClassName();
 		String packageName = file.getParentPackageName();
 
-		ClassDTO projectClass = new ClassDTO(className, packageName);
+		UmlClassDTO projectClass = new UmlClassDTO(className, packageName);
 
 		return projectClass;
 	}

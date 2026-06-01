@@ -27,13 +27,13 @@ import com.github.javaparser.ast.stmt.SwitchEntry;
 import com.github.javaparser.ast.stmt.WhileStmt;
 
 import godclassinspector.model.MetricsThresholdDTO;
-import godclassinspector.model.SourceFileDTO;
+import godclassinspector.model.ClassDTO;
 
-public class AnalysisServiceImp implements AnalysisService {
+public class DetectionServiceImp implements DetectionService {
 
 	@Override
-	public void checkGodClass(List<SourceFileDTO> files) throws Exception {
-		for (SourceFileDTO projectFile : files) {
+	public void checkGodClass(List<ClassDTO> files) throws Exception {
+		for (ClassDTO projectFile : files) {
 			this.calculateMetrics(projectFile);
 			boolean isGodClass = this.isGodClass(projectFile);
 			projectFile.setGodClass(isGodClass);
@@ -42,32 +42,32 @@ public class AnalysisServiceImp implements AnalysisService {
 
 	@Override
 	public Map<MethodDeclaration, Set<String>> getMethodToFields(CompilationUnit compilationUnit) {
-	    Map<MethodDeclaration, Set<String>> methodToFields = new HashMap<>();
+		Map<MethodDeclaration, Set<String>> methodToFields = new HashMap<>();
 
-	    Set<String> actualClassFields = new HashSet<>();
-	    compilationUnit.findAll(FieldDeclaration.class).forEach(fd -> {
-	        fd.getVariables().forEach(var -> actualClassFields.add(var.getNameAsString()));
-	    });
+		Set<String> actualClassFields = new HashSet<>();
+		compilationUnit.findAll(FieldDeclaration.class).forEach(fd -> {
+			fd.getVariables().forEach(var -> actualClassFields.add(var.getNameAsString()));
+		});
 
-	    for (MethodDeclaration method : compilationUnit.findAll(MethodDeclaration.class)) {
-	        if (!isExcludedMethod(method)) {
-	            Set<String> usedFields = new HashSet<>();
-	            List<NameExpr> accessedNames = method.findAll(NameExpr.class);
+		for (MethodDeclaration method : compilationUnit.findAll(MethodDeclaration.class)) {
+			if (!isExcludedMethod(method)) {
+				Set<String> usedFields = new HashSet<>();
+				List<NameExpr> accessedNames = method.findAll(NameExpr.class);
 
-	            for (NameExpr name : accessedNames) {
-	                if (actualClassFields.contains(name.getNameAsString())) {
-	                    usedFields.add(name.getNameAsString());
-	                }
-	            }
+				for (NameExpr name : accessedNames) {
+					if (actualClassFields.contains(name.getNameAsString())) {
+						usedFields.add(name.getNameAsString());
+					}
+				}
 
-	            methodToFields.put(method, usedFields);
-	        }
-	    }
+				methodToFields.put(method, usedFields);
+			}
+		}
 
-	    return methodToFields;
+		return methodToFields;
 	}
 
-	private boolean isGodClass(SourceFileDTO file) {
+	private boolean isGodClass(ClassDTO file) {
 		int wmcThreshold = MetricsThresholdDTO.getWmcThreshold();
 		int atfdThreshold = MetricsThresholdDTO.getAtfdThreshold();
 		double tccThreshold = MetricsThresholdDTO.getTccThreshold();
@@ -87,7 +87,7 @@ public class AnalysisServiceImp implements AnalysisService {
 		}
 	}
 
-	private void calculateMetrics(SourceFileDTO sourceFile) throws Exception {
+	private void calculateMetrics(ClassDTO sourceFile) throws Exception {
 		try {
 			File fileToAnalyze = new File(sourceFile.getAbsolutePath());
 
@@ -103,7 +103,7 @@ public class AnalysisServiceImp implements AnalysisService {
 				double methodLocalityOfAttributeAccess = calculateLocalityOfAttributeAccess(method);
 				int methodForeignDataProviders = calculateForeignDataProviders(method);
 
-				String methodKey = method.getDeclarationAsString(false, false, false);
+				String methodKey = method.getNameAsString();
 				methodsLocalityOfAttributeAccess.put(methodKey, methodLocalityOfAttributeAccess);
 				methodsForeignDataProviders.put(methodKey, methodForeignDataProviders);
 			}
@@ -117,35 +117,33 @@ public class AnalysisServiceImp implements AnalysisService {
 		} catch (NullPointerException nullPointerFile) {
 			throw new Exception("No file was found to analyze. Please make sure you have scanned the project first.");
 		} catch (ParseProblemException javaParserProblem) {
-			throw new Exception("A Java file could not be parsed. It may contain syntax errors. Please fix any compilation errors in your project and try again.");
+			throw new Exception(
+					"A Java file could not be parsed. It may contain syntax errors. Please fix any compilation errors in your project and try again.");
 		}
 	}
 
 	private int calculateWeightedMethodCount(CompilationUnit compilationUnit) {
-	    List<MethodDeclaration> classMethods = compilationUnit.findAll(MethodDeclaration.class);
+		List<MethodDeclaration> classMethods = compilationUnit.findAll(MethodDeclaration.class);
 
-	    int totalComplexity = 0;
+		int totalComplexity = 0;
 
-	    for (MethodDeclaration method : classMethods) {
-	        int methodWeight = 1;
+		for (MethodDeclaration method : classMethods) {
+			int methodWeight = 1;
 
-	        methodWeight += method.findAll(Statement.class, n ->
-	            n instanceof IfStmt || n instanceof ForStmt ||
-	            n instanceof ForEachStmt || n instanceof WhileStmt ||
-	            n instanceof DoStmt
-	        ).size();
+			methodWeight += method.findAll(Statement.class, n -> n instanceof IfStmt || n instanceof ForStmt
+					|| n instanceof ForEachStmt || n instanceof WhileStmt || n instanceof DoStmt).size();
 
-	        methodWeight += method.findAll(SwitchEntry.class).size();
-	        methodWeight += method.findAll(CatchClause.class).size();
-	        methodWeight += method.findAll(BinaryExpr.class, binaryExpression ->
-	        		binaryExpression.getOperator() == BinaryExpr.Operator.AND ||
-	        		binaryExpression.getOperator() == BinaryExpr.Operator.OR
-	        ).size();
+			methodWeight += method.findAll(SwitchEntry.class).size();
+			methodWeight += method.findAll(CatchClause.class).size();
+			methodWeight += method.findAll(BinaryExpr.class,
+					binaryExpression -> binaryExpression.getOperator() == BinaryExpr.Operator.AND
+							|| binaryExpression.getOperator() == BinaryExpr.Operator.OR)
+					.size();
 
-	        totalComplexity = totalComplexity + methodWeight;
-	    }
+			totalComplexity = totalComplexity + methodWeight;
+		}
 
-	    return totalComplexity;
+		return totalComplexity;
 	}
 
 	private int calculateAccessToForeignData(CompilationUnit compilationUnit) {
@@ -159,7 +157,7 @@ public class AnalysisServiceImp implements AnalysisService {
 				if (call.getScope().isPresent()) {
 					String classParent = call.getScope().get().toString();
 
-					if(!classParent.equals("this")) {
+					if (!classParent.equals("this") && !classParent.equals("System")) {
 						accessToForeignDataCounter++;
 					}
 				}
@@ -169,7 +167,7 @@ public class AnalysisServiceImp implements AnalysisService {
 		for (FieldAccessExpr field : accessedFields) {
 			String classParent = field.getScope().toString();
 
-			if (!classParent.equals("this")) {
+			if (!classParent.equals("this") && !classParent.equals("System")) {
 				accessToForeignDataCounter++;
 			}
 		}
@@ -187,14 +185,14 @@ public class AnalysisServiceImp implements AnalysisService {
 		int numberOfMethods = methods.size();
 
 		for (int i = 0; i < numberOfMethods; i++) {
-		    for (int j = i + 1; j < numberOfMethods; j++) {
-		        Set<String> methodFieldsA = methodToFields.get(methods.get(i));
-		        Set<String> methodFieldsB = methodToFields.get(methods.get(j));
+			for (int j = i + 1; j < numberOfMethods; j++) {
+				Set<String> methodFieldsA = methodToFields.get(methods.get(i));
+				Set<String> methodFieldsB = methodToFields.get(methods.get(j));
 
-		        if (methodFieldsA.stream().anyMatch(methodFieldsB::contains)) {
-		            connectedPairs++;
-		        }
-		    }
+				if (methodFieldsA.stream().anyMatch(methodFieldsB::contains)) {
+					connectedPairs++;
+				}
+			}
 		}
 
 		totalPossiblePairs = (numberOfMethods * (numberOfMethods - 1)) / 2;
@@ -208,29 +206,31 @@ public class AnalysisServiceImp implements AnalysisService {
 	}
 
 	private double calculateLocalityOfAttributeAccess(MethodDeclaration method) {
-	    Set<String> localAccesses = new HashSet<>();
-	    Set<String> foreignAccesses = new HashSet<>();
+		Set<String> localAccesses = new HashSet<>();
+		Set<String> foreignAccesses = new HashSet<>();
 
-	    method.findAll(FieldAccessExpr.class).forEach(fa -> {
-	        if (fa.getScope().toString().equals("this")) {
-	            localAccesses.add(fa.getNameAsString());
-	        } else {
-	            foreignAccesses.add(fa.getNameAsString());
-	        }
-	    });
+		method.findAll(FieldAccessExpr.class).forEach(fa -> {
+			String scope = fa.getScope().toString();
+			if (scope.equals("this")) {
+				localAccesses.add(fa.getNameAsString());
+			} else if (!scope.equals("System")) {
+				foreignAccesses.add(fa.getNameAsString());
+			}
+		});
 
-	    method.findAll(MethodCallExpr.class).forEach(mc -> {
-	        if (mc.getNameAsString().startsWith("get") && mc.getScope().isPresent()) {
-	            if (mc.getScope().get().toString().equals("this")) {
-	                localAccesses.add(mc.getNameAsString());
-	            } else {
-	                foreignAccesses.add(mc.getNameAsString());
-	            }
-	        }
-	    });
+		method.findAll(MethodCallExpr.class).forEach(mc -> {
+			if (mc.getNameAsString().startsWith("get") && mc.getScope().isPresent()) {
+				String scope = mc.getScope().get().toString();
+				if (scope.equals("this")) {
+					localAccesses.add(mc.getNameAsString());
+				} else if (!scope.equals("System")) {
+					foreignAccesses.add(mc.getNameAsString());
+				}
+			}
+		});
 
-	    int total = localAccesses.size() + foreignAccesses.size();
-	    return (total == 0) ? 1.0 : (double) localAccesses.size() / total;
+		int total = localAccesses.size() + foreignAccesses.size();
+		return (total == 0) ? 1.0 : (double) localAccesses.size() / total;
 	}
 
 	private int calculateForeignDataProviders(MethodDeclaration method) {
@@ -261,8 +261,8 @@ public class AnalysisServiceImp implements AnalysisService {
 
 	private boolean isExcludedMethod(MethodDeclaration method) {
 		if (method.isStatic()) {
-	        return true;
-	    }
+			return true;
+		}
 
 		String methodName = method.getNameAsString();
 

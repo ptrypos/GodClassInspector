@@ -10,7 +10,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 
 import godclassinspector.builders.PlantUmlBuilder;
-import godclassinspector.model.ClassDTO;
+import godclassinspector.model.UmlClassDTO;
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SourceStringReader;
@@ -26,7 +26,7 @@ public class UmlDiagramUI extends ViewPart {
 		browser.setText(idlePage());
 	}
 
-	public void generateUML(List<ClassDTO> classList) {
+	public void generateUML(List<UmlClassDTO> classList) {
 		String source = umlBuilder.build(classList);
 		if (source == null || source.isEmpty()) {
 			return;

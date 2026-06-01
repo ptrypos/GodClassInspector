@@ -14,7 +14,11 @@ import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
@@ -28,19 +32,19 @@ import com.github.javaparser.ast.stmt.SwitchEntry;
 import com.github.javaparser.ast.stmt.WhileStmt;
 
 import godclassinspector.model.MetricsThresholdDTO;
-import godclassinspector.model.SourceFileDTO;
+import godclassinspector.model.ClassDTO;
 
 public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringService {
 
 	private static double OVERLAP_FIELDS_METHODS = 0.30;
 
-	private final AnalysisService analysisService = new AnalysisServiceImp();
+	private final DetectionService detectionService = new DetectionServiceImp();
 
 	@Override
-	public Map<String, Map<String, String>> suggestRefactoring(List<SourceFileDTO> files) throws Exception {
+	public Map<String, Map<String, String>> suggestRefactoring(List<ClassDTO> files) throws Exception {
 		Map<String, Map<String, String>> refactoringSuggestions = new HashMap<>();
 
-		for (SourceFileDTO file : files) {
+		for (ClassDTO file : files) {
 			if (!file.isGodClass()) {
 				continue;
 			}
@@ -64,13 +68,16 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 
 			if (!typeToSuggestions.isEmpty()) {
 				refactoringSuggestions.put(file.getClassName(), typeToSuggestions);
+			} else {
+				file.setGodClass(false);
+				file.setUnrefactableClass(true);
 			}
 		}
 
 		return refactoringSuggestions;
 	}
 
-	private String getExtractMethodSuggestions(SourceFileDTO file) throws Exception {
+	private String getExtractMethodSuggestions(ClassDTO file) throws Exception {
 		File sourceFile = new File(file.getAbsolutePath());
 		CompilationUnit compilationUnit = StaticJavaParser.parse(sourceFile);
 
@@ -113,10 +120,10 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 			complexity += method.findAll(CatchClause.class).size();
 			complexity += method.findAll(SwitchEntry.class).size();
 
-			complexity += method.findAll(BinaryExpr.class, binaryExpression ->
-				binaryExpression.getOperator() == BinaryExpr.Operator.AND ||
-				binaryExpression.getOperator() == BinaryExpr.Operator.OR
-			).size();
+			complexity += method.findAll(BinaryExpr.class,
+					binaryExpression -> binaryExpression.getOperator() == BinaryExpr.Operator.AND
+							|| binaryExpression.getOperator() == BinaryExpr.Operator.OR)
+					.size();
 
 			methodComplexity.put(method.getNameAsString(), complexity);
 		}
@@ -163,9 +170,8 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 		Node current = node;
 
 		while (current != null) {
-			if (current instanceof IfStmt || current instanceof ForStmt ||
-				current instanceof ForEachStmt || current instanceof WhileStmt ||
-				current instanceof DoStmt) {
+			if (current instanceof IfStmt || current instanceof ForStmt || current instanceof ForEachStmt
+					|| current instanceof WhileStmt || current instanceof DoStmt) {
 				depth++;
 			}
 			current = current.getParentNode().orElse(null);
@@ -175,13 +181,13 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 	}
 
 	private String getExtractMethodSuggestionAsString(String methodName, Integer complexity,
-			   List<String> complexBlocks) {
+			List<String> complexBlocks) {
 		String blockDescription = String.join("; ", complexBlocks);
-		return "Method [" + methodName + "] has high complexity (" + complexity +
-		"). Consider extracting: " + blockDescription + ".";
+		return "Method [" + methodName + "] has high complexity (" + complexity + "). Consider extracting: "
+				+ blockDescription + ".";
 	}
 
-	private String getMoveMethodSuggestions(SourceFileDTO file) throws FileNotFoundException {
+	private String getMoveMethodSuggestions(ClassDTO file) throws FileNotFoundException {
 		File sourceFile = new File(file.getAbsolutePath());
 		CompilationUnit compilationUnit = StaticJavaParser.parse(sourceFile);
 
@@ -217,7 +223,8 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 		method.findAll(FieldAccessExpr.class).forEach(fa -> {
 			String scope = fa.getScope().toString();
 			if (!scope.equals("this")) {
-				providerCounts.put(scope, providerCounts.getOrDefault(scope, 0) + 1);
+				String className = resolveTypeName(method, scope);
+				providerCounts.put(className, providerCounts.getOrDefault(className, 0) + 1);
 			}
 		});
 
@@ -225,7 +232,8 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 			if (mc.getNameAsString().startsWith("get") && mc.getScope().isPresent()) {
 				String scope = mc.getScope().get().toString();
 				if (!scope.equals("this")) {
-					providerCounts.put(scope, providerCounts.getOrDefault(scope, 0) + 1);
+					String className = resolveTypeName(method, scope);
+					providerCounts.put(className, providerCounts.getOrDefault(className, 0) + 1);
 				}
 			}
 		});
@@ -234,7 +242,35 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 				.orElse("UnknownClass");
 	}
 
-	private String getExtractClassSuggestions(SourceFileDTO file) throws Exception {
+	private String resolveTypeName(MethodDeclaration method, String variableName) {
+		for (Parameter param : method.getParameters()) {
+			if (param.getNameAsString().equals(variableName)) {
+				return param.getTypeAsString();
+			}
+		}
+
+		for (VariableDeclarator var : method.findAll(VariableDeclarator.class)) {
+			if (var.getNameAsString().equals(variableName)) {
+				return var.getTypeAsString();
+			}
+		}
+
+		if (method.getParentNode().isPresent()
+				&& method.getParentNode().get() instanceof ClassOrInterfaceDeclaration) {
+			ClassOrInterfaceDeclaration parentClass = (ClassOrInterfaceDeclaration) method.getParentNode().get();
+			for (FieldDeclaration field : parentClass.getFields()) {
+				for (VariableDeclarator var : field.getVariables()) {
+					if (var.getNameAsString().equals(variableName)) {
+						return var.getTypeAsString();
+					}
+				}
+			}
+		}
+
+		return variableName;
+	}
+
+	private String getExtractClassSuggestions(ClassDTO file) throws Exception {
 		String suggestions = "";
 
 		double tccThreshold = MetricsThresholdDTO.getTccThreshold();
@@ -250,7 +286,7 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 		try {
 			File sourceFile = new File(file.getAbsolutePath());
 			CompilationUnit compilationUnit = StaticJavaParser.parse(sourceFile);
-			Map<MethodDeclaration, Set<String>> methodToFields = analysisService.getMethodToFields(compilationUnit);
+			Map<MethodDeclaration, Set<String>> methodToFields = detectionService.getMethodToFields(compilationUnit);
 			List<List<String>> methodGroups = groupMethodsBySharedFields(methodToFields);
 			List<List<String>> methodGroupsCleaned = this.filterMethodsForRefactoring(methodGroups);
 
@@ -292,9 +328,9 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 				Set<String> fieldsB = methodToFields.get(methodB);
 
 				boolean aCallsB = isMethodCalling(methodA, methodB);
-		        boolean bCallsA = isMethodCalling(methodB, methodA);
+				boolean bCallsA = isMethodCalling(methodB, methodA);
 
-		        double overlap = calculateJaccardSimilarity(fieldsA, fieldsB);
+				double overlap = calculateJaccardSimilarity(fieldsA, fieldsB);
 
 				if (overlap > OVERLAP_FIELDS_METHODS || aCallsB || bCallsA) {
 					union(parent, i, j);
@@ -313,19 +349,19 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 	}
 
 	private boolean isMethodCalling(MethodDeclaration source, MethodDeclaration target) {
-	    String targetName = target.getNameAsString();
+		String targetName = target.getNameAsString();
 
-	    List<MethodCallExpr> calls = source.findAll(MethodCallExpr.class);
+		List<MethodCallExpr> calls = source.findAll(MethodCallExpr.class);
 
-	    for (MethodCallExpr call : calls) {
-	        if (call.getNameAsString().equals(targetName)) {
-	            if (!call.getScope().isPresent() || call.getScope().get().toString().equals("this")) {
-	                return true;
-	            }
-	        }
-	    }
+		for (MethodCallExpr call : calls) {
+			if (call.getNameAsString().equals(targetName)) {
+				if (!call.getScope().isPresent() || call.getScope().get().toString().equals("this")) {
+					return true;
+				}
+			}
+		}
 
-	    return false;
+		return false;
 	}
 
 	private double calculateJaccardSimilarity(Set<String> fieldsA, Set<String> fieldsB) {
