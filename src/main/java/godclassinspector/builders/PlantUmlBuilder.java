@@ -1,7 +1,9 @@
 package godclassinspector.builders;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -9,45 +11,9 @@ import java.util.stream.Stream;
 import godclassinspector.model.UmlClassDTO;
 
 public class PlantUmlBuilder {
-
-	private final int DEFAULT_DPI = 96;
-	private final int DEFAULT_NODESEP = 60;
-	private final int DEFAULT_RANKSEP = 80;
-	private final int DEFAUTL_MARGIN = 30;
-	private final int DEFAULT_PADDING= 10;
 	private final boolean DEFAULT_LEFTTORIGHT = false;
 
-	private int dpi = DEFAULT_DPI;
-	private int nodesep = DEFAULT_NODESEP;
-	private int ranksep = DEFAULT_RANKSEP;
-	private int margin = DEFAUTL_MARGIN;
-	private int padding = DEFAULT_PADDING;
 	private boolean leftToRight = DEFAULT_LEFTTORIGHT;
-
-	public PlantUmlBuilder dpi(int dpi) {
-		this.dpi = dpi;
-		return this;
-	}
-
-	public PlantUmlBuilder nodesep(int n) {
-		this.nodesep = n;
-		return this;
-	}
-
-	public PlantUmlBuilder ranksep(int r) {
-		this.ranksep = r;
-		return this;
-	}
-
-	public PlantUmlBuilder margin(int m) {
-		this.margin = m;
-		return this;
-	}
-
-	public PlantUmlBuilder padding(int p) {
-		this.padding = p;
-		return this;
-	}
 
 	public PlantUmlBuilder leftToRight(boolean b) {
 		this.leftToRight = b;
@@ -73,11 +39,13 @@ public class PlantUmlBuilder {
 		StringBuilder sb = new StringBuilder();
 		appendHeader(sb);
 		appendSkinParams(sb);
+		appendLegend(sb);
 		appendSection(sb, "' ── Interfaces ──────────────────────────────────\n", interfaces);
 		appendSection(sb, "' ── Abstract Classes ────────────────────────────\n", abstracts);
 		appendSection(sb, "' ── Classes ─────────────────────────────────────\n", regular);
 		appendSection(sb, "' ── God Classes ─────────────────────────────────\n", godClasses);
 
+		sb.append("' ── Relationships ───────────────────────────────\n");
 		for (UmlClassDTO dto : classList) {
 			appendRelationships(sb, dto, classList);
 		}
@@ -88,44 +56,17 @@ public class PlantUmlBuilder {
 
 	private void appendHeader(StringBuilder sb) {
 		sb.append("@startuml\n");
-		sb.append("!pragma layout elk\n");
 		if (leftToRight) {
 			sb.append("left to right direction\n");
 		}
+		sb.append("\n");
 	}
 
 	private void appendSkinParams(StringBuilder sb) {
-		sb.append("skinparam dpi ").append(dpi).append("\n");
-		sb.append("skinparam backgroundcolor white\n");
-		sb.append("skinparam shadowing false\n");
 		sb.append("skinparam linetype ortho\n");
-		sb.append("skinparam ArrowColor #444444\n");
-		sb.append("skinparam ArrowThickness 1\n");
-		sb.append("skinparam nodesep ").append(nodesep).append("\n");
-		sb.append("skinparam ranksep ").append(ranksep).append("\n");
-		sb.append("skinparam margin ").append(margin).append("\n");
-		sb.append("skinparam padding ").append(padding).append("\n");
-		appendClassSkinParams(sb);
-		appendInterfaceSkinParams(sb);
 		appendGodClassSkinParams(sb);
 		appendUnrefactableClassParams(sb);
-		sb.append("skinparam classAttributeIconSize 0\n");
-		sb.append("set namespaceSeparator none\n\n");
-	}
-
-	private void appendClassSkinParams(StringBuilder sb) {
-		sb.append("skinparam class {\n");
-		sb.append("  BackgroundColor White\n");
-		sb.append("  ArrowColor #444444\n");
-		sb.append("  BorderColor #666666\n");
-		sb.append("}\n");
-	}
-
-	private void appendInterfaceSkinParams(StringBuilder sb) {
-		sb.append("skinparam interface {\n");
-		sb.append("  BackgroundColor #E1F5FE\n");
-		sb.append("  BorderColor #01579B\n");
-		sb.append("}\n");
+		sb.append("\n");
 	}
 
 	private void appendGodClassSkinParams(StringBuilder sb) {
@@ -135,13 +76,23 @@ public class PlantUmlBuilder {
 		sb.append("  FontColor #CC0000\n");
 		sb.append("}\n");
 	}
-	
+
 	private void appendUnrefactableClassParams(StringBuilder sb) {
 		sb.append("skinparam class<<Unrefactable Large Class>> {\n");
 		sb.append("  BackgroundColor #FFFF66\n");
 		sb.append("  BorderColor #CCAA00\n");
 		sb.append("  FontColor #CCAA00\n");
 		sb.append("}\n");
+	}
+
+	private void appendLegend(StringBuilder sb) {
+		sb.append("legend right\n");
+		sb.append("  |= Line   |= Meaning                          |\n");
+		sb.append("  | <\\|--   | Inheritance (extends)             |\n");
+		sb.append("  | <\\|..   | Interface realization (implements)|\n");
+		sb.append("  | -->     | Association (field reference)     |\n");
+		sb.append("  | ..>     | Dependency (param / return / new) |\n");
+		sb.append("endlegend\n\n");
 	}
 
 	private void appendSection(StringBuilder sb, String comment, List<UmlClassDTO> classes) {
@@ -158,7 +109,7 @@ public class PlantUmlBuilder {
 		String name = cleanName(dto.getClassName());
 		String type = resolveType(dto);
 		String stereo;
-		
+
 		if (dto.isGodClass()) {
 			stereo = " <<GodClass>>";
 		} else if (dto.isUnrefactableClass()) {
@@ -166,7 +117,7 @@ public class PlantUmlBuilder {
 		} else {
 			stereo = "";
 		}
-		
+
 		sb.append(type);
 		sb.append(quoted(name));
 		sb.append(stereo);
@@ -190,12 +141,15 @@ public class PlantUmlBuilder {
 
 	private void appendRelationships(StringBuilder sb, UmlClassDTO dto, List<UmlClassDTO> all) {
 		String current = cleanName(dto.getClassName());
-		appendInheritance(sb, dto, current);
-		appendInterfaceRealisations(sb, dto, current);
-		appendDependencies(sb, dto, current, all);
+		Set<String> drawn = new HashSet<>();
+
+		appendInheritance(sb, dto, current, drawn);
+		appendInterfaceRealisations(sb, dto, current, drawn);
+		appendAssociations(sb, dto, current, all, drawn);
+		appendDependencies(sb, dto, current, all, drawn);
 	}
 
-	private void appendInheritance(StringBuilder sb, UmlClassDTO dto, String current) {
+	private void appendInheritance(StringBuilder sb, UmlClassDTO dto, String current, Set<String> drawn) {
 		if (dto.getSuperClassName() == null) {
 			return;
 		}
@@ -204,11 +158,15 @@ public class PlantUmlBuilder {
 		sb.append(" <|-- ");
 		sb.append(quoted(current));
 		sb.append("\n");
+		drawn.add(parent);
 	}
 
-	private void appendInterfaceRealisations(StringBuilder sb, UmlClassDTO dto, String current) {
+	private void appendInterfaceRealisations(StringBuilder sb, UmlClassDTO dto, String current, Set<String> drawn) {
 		for (String iface : dto.getImplementedInterfaces()) {
 			String cleanIface = cleanName(iface);
+			if (!drawn.add(cleanIface)) {
+				continue;
+			}
 			sb.append(quoted(cleanIface));
 			sb.append(" <|.. ");
 			sb.append(quoted(current));
@@ -216,7 +174,26 @@ public class PlantUmlBuilder {
 		}
 	}
 
-	private void appendDependencies(StringBuilder sb, UmlClassDTO dto, String current, List<UmlClassDTO> all) {
+	private void appendAssociations(StringBuilder sb, UmlClassDTO dto, String current, List<UmlClassDTO> all,
+			Set<String> drawn) {
+		if (dto.getAssociations() == null) {
+			return;
+		}
+		for (String assoc : dto.getAssociations()) {
+			String cleanAssoc = cleanName(assoc);
+			boolean isInDiagram = isInList(cleanAssoc, all);
+			boolean isNotSelf = !cleanAssoc.equals(current);
+			if (isInDiagram && isNotSelf && drawn.add(cleanAssoc)) {
+				sb.append(quoted(current));
+				sb.append(" --> ");
+				sb.append(quoted(cleanAssoc));
+				sb.append("\n");
+			}
+		}
+	}
+
+	private void appendDependencies(StringBuilder sb, UmlClassDTO dto, String current, List<UmlClassDTO> all,
+			Set<String> drawn) {
 		if (dto.getDependencies() == null) {
 			return;
 		}
@@ -224,7 +201,7 @@ public class PlantUmlBuilder {
 			String cleanDep = cleanName(dep);
 			boolean isInDiagram = isInList(cleanDep, all);
 			boolean isNotSelf = !cleanDep.equals(current);
-			if (isInDiagram && isNotSelf) {
+			if (isInDiagram && isNotSelf && drawn.add(cleanDep)) {
 				sb.append(quoted(current));
 				sb.append(" ..> ");
 				sb.append(quoted(cleanDep));

@@ -13,6 +13,7 @@ public class UmlClassDTO {
 	private boolean isUnrefactableClass;
 	private String superClassName;
 	private List<String> implementedInterfaces = new ArrayList<>();
+	private List<String> associations = new ArrayList<>();
 	private List<String> dependencies = new ArrayList<>();
 	private List<String> fields;
 	private List<String> methods;
@@ -57,7 +58,7 @@ public class UmlClassDTO {
 	public boolean isGodClass() {
 		return isGodClass;
 	}
-	
+
 	public boolean isUnrefactableClass() {
 		return isUnrefactableClass;
 	}
@@ -84,6 +85,14 @@ public class UmlClassDTO {
 
 	public void setImplementedInterfaces(List<String> implementedInterfaces) {
 		this.implementedInterfaces = implementedInterfaces;
+	}
+
+	public List<String> getAssociations() {
+		return associations;
+	}
+
+	public void setAssociations(List<String> associations) {
+		this.associations = associations;
 	}
 
 	public List<String> getDependencies() {
@@ -114,7 +123,7 @@ public class UmlClassDTO {
 	public String toString() {
 		return "ClassDTO [className=" + className + ", packageName=" + packageName + ", isInterface=" + isInterface
 				+ ", isAbstract=" + isAbstract + ", isGodClass=" + isGodClass + ", superClassName=" + superClassName
-				+ ", implementedInterfaces=" + implementedInterfaces + ", dependencies=" + dependencies + ", fields="
-				+ fields + ", methods=" + methods + "]";
+				+ ", implementedInterfaces=" + implementedInterfaces + ", associations=" + associations
+				+ ", dependencies=" + dependencies + ", fields=" + fields + ", methods=" + methods + "]";
 	}
 }

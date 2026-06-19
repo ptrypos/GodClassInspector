@@ -152,7 +152,18 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 				complexBlocks.add("Complex loop logic block #" + blockCounter);
 			}
 		}
-
+		
+		/*
+		List<WhileStmt> whileLoops = method.findAll(WhileStmt.class);
+		for (WhileStmt whileStmt : whileLoops) {
+			int statementsInLoop = whileStmt.getBody().findAll(Statement.class).size();
+			if (statementsInLoop > 2) {
+				blockCounter++;
+				complexBlocks.add("Complex loop logic block #" + blockCounter);
+			}
+		}
+		*/
+		
 		List<CatchClause> catchClauses = method.findAll(CatchClause.class);
 		for (CatchClause catchClause : catchClauses) {
 			int statementsInCatch = catchClause.getBody().getStatements().size();
@@ -319,10 +330,10 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 			parent[i] = i;
 		}
 
-		for (int i = 0; i < numberOfMethods; i++) {
-			for (int j = i + 1; j < numberOfMethods; j++) {
-				MethodDeclaration methodA = methods.get(i);
-				MethodDeclaration methodB = methods.get(j);
+		for (int indexMethodA = 0; indexMethodA < numberOfMethods; indexMethodA++) {
+			for (int indexMethodB = indexMethodA + 1; indexMethodB < numberOfMethods; indexMethodB++) {
+				MethodDeclaration methodA = methods.get(indexMethodA);
+				MethodDeclaration methodB = methods.get(indexMethodB);
 
 				Set<String> fieldsA = methodToFields.get(methodA);
 				Set<String> fieldsB = methodToFields.get(methodB);
@@ -333,7 +344,7 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 				double overlap = calculateJaccardSimilarity(fieldsA, fieldsB);
 
 				if (overlap > OVERLAP_FIELDS_METHODS || aCallsB || bCallsA) {
-					union(parent, i, j);
+					union(parent, indexMethodA, indexMethodB);
 				}
 			}
 		}
