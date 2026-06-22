@@ -31,8 +31,8 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.SwitchEntry;
 import com.github.javaparser.ast.stmt.WhileStmt;
 
-import godclassinspector.model.MetricsThresholdDTO;
-import godclassinspector.model.ClassDTO;
+import godclassinspector.models.MetricsThresholdDTO;
+import godclassinspector.models.ClassDTO;
 
 public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringService {
 
@@ -325,9 +325,9 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 		List<MethodDeclaration> methods = new ArrayList<>(methodToFields.keySet());
 		int numberOfMethods = methods.size();
 
-		int[] parent = new int[numberOfMethods];
+		int[] methodGroup = new int[numberOfMethods];
 		for (int i = 0; i < numberOfMethods; i++) {
-			parent[i] = i;
+			methodGroup[i] = i;
 		}
 
 		for (int indexMethodA = 0; indexMethodA < numberOfMethods; indexMethodA++) {
@@ -344,14 +344,14 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 				double overlap = calculateJaccardSimilarity(fieldsA, fieldsB);
 
 				if (overlap > OVERLAP_FIELDS_METHODS || aCallsB || bCallsA) {
-					union(parent, indexMethodA, indexMethodB);
+					union(methodGroup, indexMethodA, indexMethodB);
 				}
 			}
 		}
 
 		Map<Integer, List<String>> groupMap = new LinkedHashMap<>();
 		for (int i = 0; i < numberOfMethods; i++) {
-			int root = find(parent, i);
+			int root = find(methodGroup, i);
 			String methodName = methods.get(i).getNameAsString();
 			groupMap.computeIfAbsent(root, k -> new ArrayList<>()).add(methodName);
 		}
@@ -422,19 +422,19 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 		return "Methods [" + methodList + "] can be extracted to a new class.";
 	}
 
-	private int find(int[] parent, int i) {
-		if (parent[i] != i) {
-			parent[i] = find(parent, parent[i]);
+	private int find(int[] methodGroup, int indexMethod) {
+		if (methodGroup[indexMethod] != indexMethod) {
+			methodGroup[indexMethod] = find(methodGroup, methodGroup[indexMethod]);
 		}
 
-		return parent[i];
+		return methodGroup[indexMethod];
 	}
 
-	private void union(int[] parent, int i, int j) {
-		int rootI = find(parent, i);
-		int rootJ = find(parent, j);
-		if (rootI != rootJ) {
-			parent[rootI] = rootJ;
+	private void union(int[] methodGroup, int indexMethodA, int indexMethodB) {
+		int rootMethodA = find(methodGroup, indexMethodA);
+		int rootMethodB = find(methodGroup, indexMethodB);
+		if (rootMethodA != rootMethodB) {
+			methodGroup[rootMethodA] = rootMethodB;
 		}
 	}
 }

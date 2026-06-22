@@ -10,8 +10,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import godclassinspector.model.ScanResultsDTO;
-import godclassinspector.model.ClassDTO;
+import godclassinspector.models.ScanResultsDTO;
+import godclassinspector.models.ClassDTO;
 import godclassinspector.services.DiscoveryService;
 import godclassinspector.services.DiscoveryServiceImp;
 import godclassinspector.ui.FoundFilesUI;

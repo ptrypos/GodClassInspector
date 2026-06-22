@@ -18,8 +18,8 @@ import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 
-import godclassinspector.model.ClassDTO;
-import godclassinspector.model.UmlClassDTO;
+import godclassinspector.models.ClassDTO;
+import godclassinspector.models.UmlClassDTO;
 
 public class UmlDiagramServiceImp implements UmlDiagramService {
 

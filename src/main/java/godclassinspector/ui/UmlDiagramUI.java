@@ -10,7 +10,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 
 import godclassinspector.builders.PlantUmlBuilder;
-import godclassinspector.model.UmlClassDTO;
+import godclassinspector.models.UmlClassDTO;
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SourceStringReader;

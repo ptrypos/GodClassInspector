@@ -1,4 +1,4 @@
-package godclassinspector.model;
+package godclassinspector.models;
 
 public class MetricsThresholdDTO {
 	private static final int DEFAULT_WMC_THRESHOLD = 47;

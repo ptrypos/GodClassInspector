@@ -11,10 +11,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.part.ViewPart;
 
-import godclassinspector.model.ExtractMethodInfo;
-import godclassinspector.model.NodeType;
-import godclassinspector.model.SuggestionContentProvider;
-import godclassinspector.model.SuggestionNode;
+import godclassinspector.models.ExtractMethodInfo;
+import godclassinspector.models.NodeType;
+import godclassinspector.models.SuggestionContentProvider;
+import godclassinspector.models.SuggestionNode;
 
 public class RefactoringSuggestionsUI extends ViewPart {
 

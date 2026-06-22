@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import godclassinspector.model.UmlClassDTO;
+import godclassinspector.models.UmlClassDTO;
 
 public class PlantUmlBuilder {
 	private final boolean DEFAULT_LEFTTORIGHT = false;

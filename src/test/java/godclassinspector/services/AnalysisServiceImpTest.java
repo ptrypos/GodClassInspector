@@ -20,8 +20,8 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 
-import godclassinspector.model.MetricsThresholdDTO;
-import godclassinspector.model.ClassDTO;
+import godclassinspector.models.MetricsThresholdDTO;
+import godclassinspector.models.ClassDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AnalysisServiceImpTest {

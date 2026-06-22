@@ -26,8 +26,8 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.SwitchEntry;
 import com.github.javaparser.ast.stmt.WhileStmt;
 
-import godclassinspector.model.MetricsThresholdDTO;
-import godclassinspector.model.ClassDTO;
+import godclassinspector.models.MetricsThresholdDTO;
+import godclassinspector.models.ClassDTO;
 
 public class DetectionServiceImp implements DetectionService {
 

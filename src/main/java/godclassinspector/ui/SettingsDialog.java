@@ -11,7 +11,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import godclassinspector.model.MetricsThresholdDTO;
+import godclassinspector.models.MetricsThresholdDTO;
 
 public class SettingsDialog extends TitleAreaDialog {
 

@@ -12,9 +12,9 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import godclassinspector.model.UmlClassDTO;
-import godclassinspector.model.ScanResultsDTO;
-import godclassinspector.model.ClassDTO;
+import godclassinspector.models.UmlClassDTO;
+import godclassinspector.models.ScanResultsDTO;
+import godclassinspector.models.ClassDTO;
 import godclassinspector.services.DetectionService;
 import godclassinspector.services.DetectionServiceImp;
 import godclassinspector.services.SuggestionsRefactoringService;

@@ -7,7 +7,7 @@ import java.util.Set;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 
-import godclassinspector.model.ClassDTO;
+import godclassinspector.models.ClassDTO;
 
 public interface DetectionService {
 	void checkGodClass(List<ClassDTO> files) throws Exception;

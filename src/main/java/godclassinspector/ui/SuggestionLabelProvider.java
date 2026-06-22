@@ -5,8 +5,8 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
-import godclassinspector.model.NodeType;
-import godclassinspector.model.SuggestionNode;
+import godclassinspector.models.NodeType;
+import godclassinspector.models.SuggestionNode;
 
 public class SuggestionLabelProvider extends LabelProvider {
     

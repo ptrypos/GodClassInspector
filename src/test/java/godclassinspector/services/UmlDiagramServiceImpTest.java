@@ -16,8 +16,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import godclassinspector.model.UmlClassDTO;
-import godclassinspector.model.ClassDTO;
+import godclassinspector.models.UmlClassDTO;
+import godclassinspector.models.ClassDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UmlDiagramServiceImpTest {

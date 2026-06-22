@@ -20,7 +20,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.ViewPart;
 
-import godclassinspector.model.ClassDTO;
+import godclassinspector.models.ClassDTO;
 
 public class FoundFilesUI extends ViewPart {
 

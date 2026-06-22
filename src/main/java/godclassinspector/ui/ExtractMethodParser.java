@@ -1,6 +1,6 @@
 package godclassinspector.ui;
 
-import godclassinspector.model.ExtractMethodInfo;
+import godclassinspector.models.ExtractMethodInfo;
 
 public class ExtractMethodParser {
 

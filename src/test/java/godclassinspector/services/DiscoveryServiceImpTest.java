@@ -27,7 +27,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import godclassinspector.model.ClassDTO;
+import godclassinspector.models.ClassDTO;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DiscoveryServiceImpTest {

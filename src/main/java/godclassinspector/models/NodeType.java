@@ -1,4 +1,4 @@
-package godclassinspector.model;
+package godclassinspector.models;
 
 public enum NodeType {
     ROOT,
