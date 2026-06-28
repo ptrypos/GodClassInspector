@@ -45,8 +45,7 @@ public class ExtractMethodParser {
         if (extractStart != -1) {
             String blocksText = suggestion.substring(extractStart + "Consider extracting:".length());
             blocksText = blocksText.replace(".", "").trim();
-            
-            // Split by semicolon to get individual blocks
+
             String[] blocks = blocksText.split(";");
             for (String block : blocks) {
                 String cleanBlock = block.trim();

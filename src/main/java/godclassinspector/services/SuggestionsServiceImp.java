@@ -34,7 +34,7 @@ import com.github.javaparser.ast.stmt.WhileStmt;
 import godclassinspector.models.MetricsThresholdDTO;
 import godclassinspector.models.ClassDTO;
 
-public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringService {
+public class SuggestionsServiceImp implements SuggestionsService {
 
 	private static double OVERLAP_FIELDS_METHODS = 0.30;
 
@@ -152,17 +152,6 @@ public class SuggestionsRefactoringServiceImp implements SuggestionsRefactoringS
 				complexBlocks.add("Complex loop logic block #" + blockCounter);
 			}
 		}
-		
-		/*
-		List<WhileStmt> whileLoops = method.findAll(WhileStmt.class);
-		for (WhileStmt whileStmt : whileLoops) {
-			int statementsInLoop = whileStmt.getBody().findAll(Statement.class).size();
-			if (statementsInLoop > 2) {
-				blockCounter++;
-				complexBlocks.add("Complex loop logic block #" + blockCounter);
-			}
-		}
-		*/
 		
 		List<CatchClause> catchClauses = method.findAll(CatchClause.class);
 		for (CatchClause catchClause : catchClauses) {

@@ -17,8 +17,8 @@ import godclassinspector.models.ScanResultsDTO;
 import godclassinspector.models.ClassDTO;
 import godclassinspector.services.DetectionService;
 import godclassinspector.services.DetectionServiceImp;
-import godclassinspector.services.SuggestionsRefactoringService;
-import godclassinspector.services.SuggestionsRefactoringServiceImp;
+import godclassinspector.services.SuggestionsService;
+import godclassinspector.services.SuggestionsServiceImp;
 import godclassinspector.services.UmlDiagramService;
 import godclassinspector.services.UmlDiagramServiceImp;
 import godclassinspector.ui.FoundFilesUI;
@@ -29,7 +29,7 @@ public class AnalyzeHandler extends AbstractHandler {
 
 	private final DetectionService detectionService = new DetectionServiceImp();
 	private final UmlDiagramService umlDiagramService = new UmlDiagramServiceImp();
-	private final SuggestionsRefactoringService suggestionsRefactoring = new SuggestionsRefactoringServiceImp();
+	private final SuggestionsService suggestionsRefactoring = new SuggestionsServiceImp();
 
 	private static boolean enabled = false;
 

@@ -21,10 +21,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import godclassinspector.models.ClassDTO;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SuggestionsRefactoringServiceImpTest {
+public class SuggestionsServiceImpTest {
 
 	@InjectMocks
-	private SuggestionsRefactoringServiceImp suggestionsService;
+	private SuggestionsServiceImp suggestionsService;
 
 	private ClassDTO godClass;
 	private ClassDTO normalClass;

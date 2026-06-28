@@ -24,7 +24,7 @@ import godclassinspector.models.MetricsThresholdDTO;
 import godclassinspector.models.ClassDTO;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AnalysisServiceImpTest {
+public class DetectionServiceImpTest {
 
     @InjectMocks
     private DetectionServiceImp analysisService;
