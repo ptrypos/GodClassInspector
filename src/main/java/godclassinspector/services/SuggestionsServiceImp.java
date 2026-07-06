@@ -87,8 +87,8 @@ public class SuggestionsServiceImp implements SuggestionsService {
 		CompilationUnit compilationUnit = StaticJavaParser.parse(sourceFile);
 
 		List<String> suggestions = new ArrayList<>();
-		Map<String, Integer> methodComplexity = calculateMethodComplexity(compilationUnit);
-		int extractMethodThreshold = MetricsThresholdDTO.getExtractMethodThreshold();
+		Map<String, Integer> methodsComplexity = calculateMethodComplexity(compilationUnit);
+		int extractMethodComplexityThreshold = MetricsThresholdDTO.getExtractMethodComplexityThreshold();
 
 		for (MethodDeclaration method : compilationUnit.findAll(MethodDeclaration.class)) {
 			if (isExcludedMethod(method.getNameAsString())) {
@@ -96,13 +96,13 @@ public class SuggestionsServiceImp implements SuggestionsService {
 			}
 
 			String methodName = method.getNameAsString();
-			Integer complexity = methodComplexity.get(methodName);
+			Integer methodComplexity = methodsComplexity.get(methodName);
 
-			if (complexity != null && complexity >= extractMethodThreshold) {
+			if (methodComplexity != null && methodComplexity >= extractMethodComplexityThreshold) {
 				List<String> complexBlocks = identifyComplexCodeBlocks(method);
 
 				if (!complexBlocks.isEmpty()) {
-					String suggestion = getExtractMethodSuggestionAsString(methodName, complexity, complexBlocks);
+					String suggestion = getExtractMethodSuggestionAsString(methodName, methodComplexity, complexBlocks);
 					suggestions.add(suggestion);
 				}
 			}

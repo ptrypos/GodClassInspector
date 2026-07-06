@@ -5,8 +5,7 @@ public class MetricsThresholdDTO {
 	private static final int DEFAULT_ATFD_THRESHOLD = 5;
 	private static final double DEFAULT_TCC_THRESHOLD = 0.33;
 	private static final double DEFAULT_LAA_THRESHOLD = 0.33;
-	private static final int MOVE_METHOD_FDP_VALUE = 1;
-	private static final int EXTRACT_METHOD_FDP_VALUE = 3;
+	private static final int EXTRACT_METHOD_COMPLEXITY_VALUE = 3;
 
 	private static int wmcThreshold = DEFAULT_WMC_THRESHOLD;
 	private static int atfdThreshold = DEFAULT_ATFD_THRESHOLD;
@@ -44,12 +43,8 @@ public class MetricsThresholdDTO {
 	public static void setLaaThreshold(double laaThreshold) {
 		MetricsThresholdDTO.laaThreshold = laaThreshold;
 	}
-
-	public static int getMoveMethodThreshold() {
-		return MOVE_METHOD_FDP_VALUE;
-	}
 	
-	public static int getExtractMethodThreshold() {
-		return EXTRACT_METHOD_FDP_VALUE;
+	public static int getExtractMethodComplexityThreshold() {
+		return EXTRACT_METHOD_COMPLEXITY_VALUE;
 	}
 }
