@@ -213,8 +213,6 @@ public class DetectionServiceImp implements DetectionService {
 			String scope = fa.getScope().toString();
 			if (scope.equals("this")) {
 				localAccesses.add(fa.getNameAsString());
-			} else if (!scope.equals("System")) {
-				foreignAccesses.add(fa.getNameAsString());
 			}
 		});
 

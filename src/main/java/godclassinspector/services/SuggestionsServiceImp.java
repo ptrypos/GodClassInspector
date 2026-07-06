@@ -31,8 +31,8 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.SwitchEntry;
 import com.github.javaparser.ast.stmt.WhileStmt;
 
-import godclassinspector.models.MetricsThresholdDTO;
 import godclassinspector.models.ClassDTO;
+import godclassinspector.models.MetricsThresholdDTO;
 
 public class SuggestionsServiceImp implements SuggestionsService {
 
@@ -43,6 +43,11 @@ public class SuggestionsServiceImp implements SuggestionsService {
 	@Override
 	public Map<String, Map<String, String>> suggestRefactoring(List<ClassDTO> files) throws Exception {
 		Map<String, Map<String, String>> refactoringSuggestions = new HashMap<>();
+
+		Set<String> projectClassNames = new HashSet<>();
+		for (ClassDTO file : files) {
+			projectClassNames.add(file.getClassName());
+		}
 
 		for (ClassDTO file : files) {
 			if (!file.isGodClass()) {
@@ -56,7 +61,7 @@ public class SuggestionsServiceImp implements SuggestionsService {
 				typeToSuggestions.put("Extract Method", extractMethodSuggestions);
 			}
 
-			String moveMethodSuggestions = getMoveMethodSuggestions(file);
+			String moveMethodSuggestions = getMoveMethodSuggestions(file, projectClassNames);
 			if (!moveMethodSuggestions.isEmpty()) {
 				typeToSuggestions.put("Move Method", moveMethodSuggestions);
 			}
@@ -152,7 +157,7 @@ public class SuggestionsServiceImp implements SuggestionsService {
 				complexBlocks.add("Complex loop logic block #" + blockCounter);
 			}
 		}
-		
+
 		List<CatchClause> catchClauses = method.findAll(CatchClause.class);
 		for (CatchClause catchClause : catchClauses) {
 			int statementsInCatch = catchClause.getBody().getStatements().size();
@@ -187,7 +192,7 @@ public class SuggestionsServiceImp implements SuggestionsService {
 				+ blockDescription + ".";
 	}
 
-	private String getMoveMethodSuggestions(ClassDTO file) throws FileNotFoundException {
+	private String getMoveMethodSuggestions(ClassDTO file, Set<String> projectClassNames) throws FileNotFoundException {
 		File sourceFile = new File(file.getAbsolutePath());
 		CompilationUnit compilationUnit = StaticJavaParser.parse(sourceFile);
 
@@ -198,10 +203,8 @@ public class SuggestionsServiceImp implements SuggestionsService {
 			String methodName = method.getNameAsString();
 
 			if (laaMap.containsKey(methodName) && laaMap.get(methodName) < MetricsThresholdDTO.getLaaThreshold()) {
-				int foreignDataProviders = file.getForeignDataProviders().get(methodName);
-
-				if (foreignDataProviders == MetricsThresholdDTO.getMoveMethodThreshold()) {
-					String targetClass = findTargetClass(method);
+				String targetClass = findTargetClass(method, projectClassNames);
+				if (!"UnknownClass".equals(targetClass)) {
 					String suggestion = getMoveMethodSuggestionAsString(methodName, targetClass);
 					suggestions.add(suggestion);
 				}
@@ -217,14 +220,16 @@ public class SuggestionsServiceImp implements SuggestionsService {
 		return suggestion;
 	}
 
-	private String findTargetClass(MethodDeclaration method) {
+	private String findTargetClass(MethodDeclaration method, Set<String> projectClassNames) {
 		Map<String, Integer> providerCounts = new HashMap<>();
 
 		method.findAll(FieldAccessExpr.class).forEach(fa -> {
 			String scope = fa.getScope().toString();
 			if (!scope.equals("this")) {
 				String className = resolveTypeName(method, scope);
-				providerCounts.put(className, providerCounts.getOrDefault(className, 0) + 1);
+				if (projectClassNames.contains(className)) {
+					providerCounts.put(className, providerCounts.getOrDefault(className, 0) + 1);
+				}
 			}
 		});
 
@@ -233,7 +238,9 @@ public class SuggestionsServiceImp implements SuggestionsService {
 				String scope = mc.getScope().get().toString();
 				if (!scope.equals("this")) {
 					String className = resolveTypeName(method, scope);
-					providerCounts.put(className, providerCounts.getOrDefault(className, 0) + 1);
+					if (projectClassNames.contains(className)) {
+						providerCounts.put(className, providerCounts.getOrDefault(className, 0) + 1);
+					}
 				}
 			}
 		});
