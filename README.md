@@ -1,10 +1,10 @@
 # God Class Inspector
 
-God Class Inspector is an Eclipse IDE plugin developed to automate the detection and refactoring of the "God Class" (or God Object) anti-pattern within Java codebases.
+God Class Inspector is an Eclipse IDE plugin developed to automate the detection of the "God Class" (or God Object) anti-pattern within Java codebases and provide data-driven refactoring suggestions.
 
 Developed as a thesis project at the Department of Computer Science and Engineering, University of Ioannina, this repository serves as an academic proof-of-concept and a research tool for software architecture analysis. It is not actively maintained or distributed as a standalone commercial product.
 
-The God Class anti-pattern manifests when a single class assumes excessive responsibilities and centralizes system control, thereby violating the Single Responsibility Principle (SRP). Such classes degrade software maintainability, testability, and extensibility. To address this, the God Class Inspector seamlessly integrates into the Eclipse environment to parse Java source code, compute structural object-oriented metrics, generate visual architectural representations, and provide data-driven refactoring recommendations.
+The God Class anti-pattern manifests when a single class assumes excessive responsibilities and centralizes system control, thereby violating the Single Responsibility Principle (SRP). Such classes degrade software maintainability, testability, and extensibility. To address this, the God Class Inspector seamlessly integrates into the Eclipse environment to parse Java source code, compute structural object-oriented metrics, generate visual architectural representations, and provide actionable refactoring recommendations.
 
 ## Features
 
@@ -81,6 +81,10 @@ The plugin provides specialized views. To open them, navigate to **Window -> Sho
 * **God Class Inspector:** The main view listing the detected files, highlighting which ones are classified as God Classes or Unrefactable Large Classes.
 * **UML With God Classes:** A PlantUML-generated visual representation of the classes. God Classes are highlighted in red, and unrefactable large classes in yellow.
 * **Refactoring Suggestions:** A searchable tree view providing actionable advice on how to split or improve the flagged classes via Extract Method, Move Method, or Extract Class operations.
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
